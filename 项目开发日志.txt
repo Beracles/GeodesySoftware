@@ -1,0 +1,434 @@
+开发目标：实现大地测量学课上老师要求实现的大地测量的相关功能
+作者：周疆
+任务：
+工具条模块
+坐标系转换被调用时，虽然任务栏中不可见，但是当出现错误时，还是会出现在任务栏中
+	
+想法：设置超时，当某个功能点击后长时间未响应时，超过一定时间后报错，提醒超时
+
+主窗体调用 坐标系转换.exe时，坐标系转换.exe会显示在任务管理器中。
+想法：这个可能就是调用本项目窗体和调用外部程序的区别之一
+
+配置功能：
+	1.椭球体设置
+	2.坐标系设置
+	3.控制窗体是否可控大小
+	4.单位设置
+目录模块：
+	1.目录树
+	2.显示文件夹连接
+	3.显示关联目录下的文件和文件夹
+新建模块：
+	1.画图功能
+	2.三维模型的建立
+	3.编辑功能
+工具栏：
+	1.条状
+	2.可编辑
+	3.界面自定义
+信息显示：
+	1.当前椭球体
+	2.当前坐标系
+	3.当前鼠标的位置
+	4.单位
+
+开发日程：
+2019-11-8
+1.主窗体MainForm设计：文件（新建、打开）、工具（坐标系转换、）、自定义（配置）、帮助；
+2.定义坐标系转换类Coordinate
+3.定义并实现函数GCStoMRACS()
+4.定义椭球体类Ellipsoid
+
+
+2019-11-9
+1.确定坐标系转换功能转换过程
+2.定义并实现函数GCStoSRCS(),MRACStoSRCS(),SRCStoGCS(),SRCStoMRACS()
+
+2019-11-10
+1.坐标系转换功能图标设计
+2.配置，新建，打开图标设计
+
+2019-11-12
+1.定义新类型Errors,用于放置所有错误代码的定义
+2.在类Coordinate中定义函数Dist_to_Origin()，返回点到地心的距离
+3.解决坐标系转换功能模块问题：空间直角坐标或子午面直角坐标转换为大地坐标系，当输入的点位置在地心时程序无响应
+解决：	在Solution中定义新类型Errors，在其中定义错误代码Cant_Transfer；在类Coordinate中定义函数Dist_to_Origin()，返回点到地心的距离；
+		在函数SRCStoGCS()的实现中增加判断：输入点到地心的距离是否为0，如果是，将错误代码Cant_Transfer赋给要返回的坐标的X，Y值；
+		可以知道大地坐标的H值为长半轴长的相反数-a；在输出坐标函数Coordinate_Show()的实现中增加判断，坐标值是否错误代码Cant_Transfer；
+		是则在相应的文本框中输出“无法确定”，其他正常输出；
+4.将坐标系转换类名称由Coordinate改为Coordinate_Transfer
+5.在主界面项目中新建“配置”窗体
+6.在主界面项目中新建类型Setting，用于定义程序运行过程中用到的各种配置属性
+7.将坐标系转换项目中所有关于椭球体和坐标系的属性和方法转移到Setting中
+8.改变引用关系，以后只所有模块引用主界面，主窗体不对其他项目进行引用（不能双向引用，只能单向）
+9.将类型Coordinate_Transfer中的Variables变量改名为Variable_names
+10.改变坐标系转换中当前椭球体的读取过程：取消对文件的读取，改为直接对主界面属性类Setting中的当前椭球体变量Current_Ellipsoid进行读取
+
+12.定义错误代码Not_Pure_Num，文本非纯数字
+13.实现系统加载时，主界面当前椭球体和坐标系的显示
+
+2019-11-13
+1.配置模块窗体设计
+2.定义单位属性
+3.恢复Get_Current_Ellipsoid()使用，并将其更名为Get_Current_Ellipsoid_Num()；定义当前椭球体代号变量Current_Ellipsoid_Num，用于存放当前椭球体的代号
+4.将Get_Current_Ellipsoid_Num()改名为Get_Current_Setting(),功能重新定位为：在主窗体加载时读取配置文件中所有的配置信息，并将其赋给相应变量
+5.废弃：
+
+        //当前椭球体
+        private static Ellipsoid current_Ellipsoid = WGS_84_ellipsoid;
+        /// <summary>
+        /// 当前地球椭球体，默认为 WGS-84椭球体
+        /// </summary>
+        public static Ellipsoid Current_Ellipsoid { get => current_Ellipsoid; set => current_Ellipsoid = value; }
+6.将当前椭球体变量Current_Ellipsoid_Num更名为Current_Ellipsoid
+7.废弃：
+            if (Setting.Current_Ellipsoid == Setting.Krassowski_eliipsoid)
+                Current_Ellipsoid_tssl.Text = "椭球体：" + "克拉索夫斯基椭球体";
+            else if (Setting.Current_Ellipsoid == Setting.International_ellipsoid)
+                Current_Ellipsoid_tssl.Text = "椭球体：" + "1975年国际椭球体";
+            else if (Setting.Current_Ellipsoid == Setting.WGS_84_ellipsoid)
+                Current_Ellipsoid_tssl.Text = "椭球体：" + "WGS-84椭球体";
+            else if (Setting.Current_Ellipsoid == Setting.CGCS2000_ellipsoid)
+                Current_Ellipsoid_tssl.Text = "椭球体：" + "2000中国大地坐标系(GCS2000)";
+8.定义椭球体名称列表Ellipsoids和坐标系名称列表Coordinate_Systems
+9.废弃：
+            switch (Setting.Current_Coordinate_System)
+            {
+                case Setting.GCS:
+                    Current_Coordinate_System_tssl.Text = "坐标系：" + "大地坐标系";
+                    break;
+                case Setting.MRACS:
+                    Current_Coordinate_System_tssl.Text = "坐标系：" + "子午面直角坐标系";
+                    break;
+                case Setting.SRCS:
+                    Current_Coordinate_System_tssl.Text = "坐标系：" + "空间直角坐标系";
+                    break;
+            }
+
+            switch (Setting.Current_Ellipsoid)
+            {
+                case 0:
+                    Current_Ellipsoid_tssl.Text = "椭球体：" + "克拉索夫斯基椭球体";
+                    break;
+                case 1:
+                    Current_Ellipsoid_tssl.Text = "椭球体：" + "1975年国际椭球体";
+                    break;
+                case 2:
+                    Current_Ellipsoid_tssl.Text = "椭球体：" + "WGS-84椭球体";
+                    break;
+                case 3:
+                    Current_Ellipsoid_tssl.Text = "椭球体：" + "2000中国大地坐标系(GCS2000)";
+                    break;
+            }
+11.实现主窗体加载时配置文件的读取
+12.解决转换时同时有空文本框和非纯数字的问题和全为非纯数字的问题；解决小数被判断为非纯数字的问题；
+解决多个小数点被判断为纯数字的问题
+13.实现只能调用一个配置窗体
+14.在窗口下拉菜单下设置锁定布局按钮
+15.配置功能的实现，只差没有写入配置文件
+
+任务：
+1.实现当配置框没有关闭时，无法对主窗体操作，并且配置框会闪烁
+2.对当前配置导出，下次启动时可以通过加载配置文件完成属性设置
+问题：设计器中的底部显示条控件丢失，但是代码依然存在
+
+2019-11-14
+1.发现坐标系转换模块问题：第一次转换时，结果
+2.废弃：
+
+            //初始化输入模块中的坐标变量标签
+            x1_lbl.Text = Coordinate_Transfer.Variable_names[Setting.Current_Coordinate_System, 0] + ":";
+            y1_lbl.Text = Coordinate_Transfer.Variable_names[Setting.Current_Coordinate_System, 1] + ":";
+            z1_lbl.Text = Coordinate_Transfer.Variable_names[Setting.Current_Coordinate_System, 2] + ":";
+
+			//
+			if (x1_Deg_txtBx.Text == string.Empty && x1_Min_txtBx.Text == string.Empty && x1_Sec_txtBx.Text == string.Empty)
+                {
+                    cv.X = Errors.Empty_TextBox;//当x1的输入框都为空时，返回错误代码：Empty_TextBox
+                }
+                else
+                {
+                    
+                }
+
+            //当文本框都不为空时，判断文本是否为纯数字，是则进行转换，否则赋值为错误代码Not_Pure_Num
+            if (x1_Deg_txtBx.Text != string.Empty && 
+                y1_Deg_txtBx.Text != string.Empty && 
+                z1_txtBx.Text != string.Empty)
+            {
+                cv.X = Num_Check(x1_Deg_txtBx.Text) ? Convert.ToDouble(x1_Deg_txtBx.Text) : Errors.Not_Pure_Num;
+                cv.Y = Num_Check(y1_Deg_txtBx.Text) ? Convert.ToDouble(y1_Deg_txtBx.Text) : Errors.Not_Pure_Num;
+                cv.Z = Num_Check(z1_txtBx.Text) ? Convert.ToDouble(z1_txtBx.Text) : Errors.Not_Pure_Num;
+            }
+            //有文本框为空时，将相应坐标赋值为错误代码Empty_TextBox，对不为空的文本框的文本进行值转换
+            else
+            {
+                if (x1_Deg_txtBx.Text == string.Empty)
+                    cv.X = Errors.Empty_TextBox;
+                else//非空时判断是否为纯数字
+                    cv.X = Num_Check(x1_Deg_txtBx.Text) ? Convert.ToDouble(x1_Deg_txtBx.Text) : Errors.Not_Pure_Num;
+                
+                if (y1_Deg_txtBx.Text == string.Empty)
+                    cv.Y = Errors.Empty_TextBox;
+                else//非空时判断是否为纯数字
+                    cv.Y = Num_Check(y1_Deg_txtBx.Text) ? Convert.ToDouble(y1_Deg_txtBx.Text) : Errors.Not_Pure_Num;
+                if (z1_txtBx.Text == string.Empty)
+                    cv.Z = Errors.Empty_TextBox;
+                else//非空时判断是否为纯数字,是则转换，否则返回错误代码：Not_Pure_Num
+                    cv.Z = Num_Check(z1_txtBx.Text) ? Convert.ToDouble(z1_txtBx.Text) : Errors.Not_Pure_Num;
+            }
+
+				string tip1 = "";    //存储文本框为空的对应的坐标变量
+                string tip2 = "";    //存储非纯数字文本框对应的坐标变量
+                int times1 = 0, times2 = 0;      //记录tip长度增加的次数是否大于0，大于0时则在要添加到tip后面的坐标变量前加一个逗号
+
+                //当有文本框为空时，输出提示信息
+                if (p1.X == Errors.Empty_TextBox || p1.Y == Errors.Empty_TextBox || p1.Z == Errors.Empty_TextBox)
+                {
+                    if (p1.X == Errors.Empty_TextBox)
+                    {
+                        tip1 += x1_lbl.Text[0];
+                        times1++;
+                    }
+                    else if(p1.X == Errors.Not_Pure_Num)
+                    {
+                        tip2 += x1_lbl.Text[0];
+                        times2++;
+                    }
+                    if (p1.Y == Errors.Empty_TextBox)
+                    {
+                        tip1 += (times1 > 0 ? "," : "") + y1_lbl.Text[0];
+                        times1++;
+                    }
+                    else if (p1.Y == Errors.Not_Pure_Num)
+                    {
+                        tip2 += y1_lbl.Text[0];
+                        times2++;
+                    }
+                    if (p1.Z == Errors.Empty_TextBox)
+                        tip1 += (times1 > 0 ? "," : "") + z1_lbl.Text[0];
+                    else if(p1.Z == Errors.Not_Pure_Num)
+                        tip2 += (times2 > 0 ? "," : "") + z1_lbl.Text[0];
+                    if (times2 == 0)
+                        MessageBox.Show("请输入要转换的坐标系 \"" + Present_Coordinate_cbBx.Text + "\" 的坐标值:" + tip1,
+                            "Tip", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    else
+                        MessageBox.Show("请输入要转换的坐标系 \"" + Present_Coordinate_cbBx.Text + "\" 的坐标值:" + tip1 + 
+                            "\n" +"坐标值：" + tip2 + "非法", "Warning", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    tip1 = tip2 = "";
+                    goto end;
+                }
+
+
+				
+            x2_txtBx.Text = cv.X == Errors.Cant_Transfer ? "无法确定" : cv.X.ToString();
+            y2_txtBx.Text = cv.Y == Errors.Cant_Transfer ? "无法确定" : cv.Y.ToString();
+            z2_txtBx.Text = cv.Z == Errors.Cant_Transfer ? "无法确定" : cv.Z.ToString();
+
+3.实现度分秒坐标值的输入
+4.问题：当空间直角坐标系为（0,0,0）时，结果有问题，转子午时出现NaN，转大地时会未响应
+5.问题：正负号输入应限定输入框或者在第一个框前面加一个下拉菜单用来选择正负号，默认为正
+6.度分秒转度再转度分秒会导致误差
+2019-11-15
+1.解决昨天晚上出现的4问题
+2.解决问题5，采用限定负号输入框为第一个框，在其他框输入负号会弹窗提示错误
+3.实现坐标系转换程序单进程
+4.废弃：
+        /// <summary>
+        /// 进程变量p，用于调用外部程序
+        /// </summary>
+        public static Process p;        
+
+        /// <summary>
+        /// 发送器，向外部程序传入参数，告诉它他的调用者
+        /// MainForm代表主窗体
+        /// </summary>
+        public static string Sender = "MainForm";
+
+		//坐标系转换程序的路径
+            string path = Directory.GetCurrentDirectory()+@"\..\..\..\坐标系转换\bin\Debug\坐标系转换.exe";
+            if (p == null)
+            {
+                if (!File.Exists(path))
+                {
+                    MessageBox.Show("找不到文件：坐标系转换.exe", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    return;
+                }
+                p = new Process();
+                p.StartInfo.FileName = path;
+                p.StartInfo.Arguments = Sender;
+                p.Start();
+            }
+            else
+            {
+                if (p.HasExited) //是否正在运行
+                {
+                    p.Start();
+                }
+            }
+            p.StartInfo.WindowStyle = System.Diagnostics.ProcessWindowStyle.Normal;
+
+			//如果进程变量p非空，且进程还没有退出，则退出进程
+            if (p!=null &&!p.HasExited)
+                p.Kill();
+            
+            //局部变量，保存文件"配置文件.txt"的路径
+            string path = Directory.GetCurrentDirectory() + @"\..\..\..\配置文件.txt";
+
+            if (Setting.Use_Same_Setting_Check)
+            {
+                //判断文件是否存在
+                if (!File.Exists(path))
+                {
+                    MessageBox.Show("文件不存在：" + path + "\n设置保存不成功", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    return;
+                }
+                FileStream fs = File.OpenWrite(path);
+                StreamWriter sw = new StreamWriter(fs);
+                
+
+            }
+
+			//if (this.Width != width)
+            //{
+            //    this.Height = (int)(this.Width * 0.618);
+            //    height = this.Height;
+            //    width = this.Width;
+            //}
+            //if (this.Height != height)
+            //{
+            //    this.Width = (int)(this.Height / 0.618);
+            //    height = this.Height;
+            //    width = this.Width;
+            //}
+5.合并项目 主界面和坐标系转换，将主界面改名为MySystem
+6.实现只能打开一个子窗体
+7.实现子窗体随父窗体最小化和正常化
+
+8问题：实现子窗体没关闭时无法操作主窗体，但是，主窗体无法最小化
+9.实现配置文件的写入
+
+2019-11-16
+1.实现椭球体查看功能
+
+2019-11-21
+1.废弃：
+
+        private int times_change = 0;
+		
+            times_change++;
+
+            times_change++;
+
+
+			//判断是否为纯数字
+                string tip = "";    //存储文本框输入值非纯数字时对应的坐标变量
+                int times = 0;       //记录tip长度增加的次数是否大于0，大于0时则在要添加到tip后面的坐标变量前加一个逗号
+                if (p1.X == Errors.Input_Illegal || p1.Y == Errors.Input_Illegal || p1.Z == Errors.Input_Illegal)
+                {
+                    //有非纯数字时，弹窗提示
+                    if (p1.X == Errors.Input_Illegal)
+                    {
+                        tip += x1_lbl.Text[0];
+                        times++;
+                    }
+                    if (p1.Y == Errors.Input_Illegal)
+                    {
+                        tip += (times > 0 ? "," : "") + y1_lbl.Text[0];
+                        times++;
+                    }
+                    if (p1.Z == Errors.Input_Illegal)
+                        tip += (times > 0 ? "," : "") + z1_lbl.Text[0];
+                    MessageBox.Show("坐标值：" + tip+" 非法", "Warning", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    return;
+                }
+
+
+				
+            foreach(ComboBox cbBx in Target_Coordinate_cbBxs)
+            {
+                cbBx.SelectedIndex = 0;
+            }
+            Target_Coordinate_cbBx0.SelectedIndex = Setting.MRACS;   //MRACS代表子午面直角坐标系
+
+			
+            //判断已知坐标系与目标坐标系是否相同
+            //当已知坐标系与目标坐标系相同时，弹窗提示
+            if (Present_Coordinate_cbBx.SelectedIndex == Target_Coordinate_cbBx0.SelectedIndex)
+            {
+                MessageBox.Show( "坐标系没有变化","Tip", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                return;
+            }
+
+			//当已知坐标系与目标坐标系不同时，进行转换
+            else
+            {
+            }
+2.实现输入时负号的处理
+3.验证程序输出结果的正确性
+4.实现目标坐标系下拉菜单随已知坐标系的切换而改变选项的内容
+5.实现输出精度的限制
+6.实现负号的输出
+
+2019-11-24
+1.废弃：
+
+                    Microsoft.Office.Interop.Excel.Application excel = new Microsoft.Office.Interop.Excel.Application();
+                    //{
+                    //    Visible = true,
+                    //    UserControl = false
+                    //};
+                    excel.DefaultFilePath = filename;
+                    Workbook wb = excel.Application.Workbooks.Open(filename);//打开工作簿
+                    Worksheet ws = wb.Worksheets["$Sheet1"];
+
+                    int rows_count = ws.UsedRange.Rows.Cells.Count;//获取表的行数
+                    int columns_count = ws.UsedRange.Columns.Cells.Count;//获取表的列数
+
+                    //int X_column = 0, Y_column = 1, Z_column = 2;
+
+                    ////读取字段x,y,z在第几列
+                    //for (column_Index = 0; column_Index < columns_count; column_Index++)
+                    //{
+                    //    if (ws.Columns[column_Index][0].Value.ToString() == "X")
+                    //        X_column = column_Index;
+                    //    if (ws.Columns[column_Index][0].Value.ToString() == "Y")
+                    //        Y_column = column_Index;
+                    //    if (ws.Columns[column_Index][0].Value.ToString() == "Z")
+                    //        Z_column = column_Index;
+                    //}
+
+                    //for(row_Index = 1; row_Index < rows_count; row_Index++)
+                    //{
+                    //    ((DataGridView)sender).Rows[row_Index - 1].Cells[0].Value = ws.Cells[X_column, row_Index].Value.ToString();
+                    //    ((DataGridView)sender).Rows[row_Index - 1].Cells[1].Value = ws.Cells[Y_column, row_Index].Value.ToString();
+                    //    ((DataGridView)sender).Rows[row_Index - 1].Cells[2].Value = ws.Cells[Z_column, row_Index].Value.ToString();
+                    //}
+
+                    for (int row_index = 2; row_index < rows_count; row_index++)
+                    {
+                        for (int column_index = 0; column_index < columns_count; column_index++)
+                        {
+                            ((DataGridView)sender).Rows[row_index - 2].Cells[column_index].Value = ws.Cells[row_index, column_index].Value;
+                        }
+                    }
+                    wb.Close();
+
+
+2019-11-26
+1.废弃：
+				string Parameters = "转换参数如下：\n" +
+                "△Xo=" + Ellipsoid_Transfer_Form.dXo.ToString() + "\n" +
+                "△Yo=" + Ellipsoid_Transfer_Form.dYo.ToString() + "\n" +
+                "△Zo=" + Ellipsoid_Transfer_Form.dZo.ToString() + "\n" +
+                "m=" + Ellipsoid_Transfer_Form.m.ToString() + "\n" +
+                "εX=" + Ellipsoid_Transfer_Form.eX.ToString() + "\n" +
+                "εY=" + Ellipsoid_Transfer_Form.eY.ToString() + "\n" +
+                "εZ=" + Ellipsoid_Transfer_Form.eZ.ToString() + "\n";
+            if (Coordinate_System == Ellipsoid_Transfer_Form.GCS)//大地坐标系比空间直角坐标系多两个参数
+            {
+                Parameters +=
+                    "△a=" + Ellipsoid_Transfer_Form.da.ToString() + "\n" +
+                    "△α=" + Ellipsoid_Transfer_Form.daf.ToString() + "\n";
+            }
+            MessageBox.Show(Parameters, "查看参数", MessageBoxButtons.OK, MessageBoxIcon.Information);
