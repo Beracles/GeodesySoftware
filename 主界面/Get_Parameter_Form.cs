@@ -84,117 +84,135 @@ namespace MySystem
 
         private void Import_Excel_tsmi_Click(object sender, EventArgs e)
         {
-            OpenFileDialog ofd = new OpenFileDialog
-            {
-                Filter = "Excel文件(*.xls)|*.xls|Excel文件(*.xlsx)|*.xlsx|文本(*.txt)|*.txt",
-                CheckFileExists = true
-            };
-            if (ofd.ShowDialog() == DialogResult.OK)
-            {
-                string filename = ofd.FileName;//文件名
-
-                IWorkbook wb;
-                ISheet sheet;
-                IRow row;
-                FileStream fs;
-                fs = new FileStream(filename, FileMode.Open, FileAccess.Read);
-                int column_last, column_first;
-                int row_last, row_first;
-                switch (ofd.FilterIndex)
+            try
+            { 
+                OpenFileDialog ofd = new OpenFileDialog
                 {
-                    case 1://第一个索引为.xls格式
-                        wb = new HSSFWorkbook(fs);
-                        sheet = (HSSFSheet)wb.GetSheet("Sheet1");
+                    Filter = "Excel文件(*.xlsx)|*.xlsx|Excel文件(*.xls)|*.xls|文本(*.txt)|*.txt",
+                    CheckFileExists = true
+                };
+                if (ofd.ShowDialog() == DialogResult.OK)
+                {
+                    string filename = ofd.FileName;//文件名
 
-                        //获取行数和列数
-                        
-                        row_first = sheet.FirstRowNum;
-                        row_last = sheet.LastRowNum;
-                        row = sheet.GetRow(row_first);
-                        column_first = row.FirstCellNum;
-                        column_last = row.LastCellNum;
+                    IWorkbook wb;
+                    ISheet sheet;
+                    IRow row;
+                    FileStream fs;
+                    fs = new FileStream(filename, FileMode.Open, FileAccess.Read);
+                    //列索引
+                    int column_last, column_first;
+                    //行索引
+                    int row_last, row_first;
+                    switch (ofd.FilterIndex)
+                    {
+                        case 1://第一个索引为.xlsx格式
+                            wb = new XSSFWorkbook(fs);
+                            sheet = (XSSFSheet)wb.GetSheet("Sheet1");
 
-                        for (int i = row_first; i <= row_last; i++)
-                        {
-                            Get_Parameter_dgv.Rows.Add();
-                            for (int j = column_first; j < column_last; j++)
+                            //获取行数和列数
+                            row_first = sheet.FirstRowNum;
+                            row_last = sheet.LastRowNum;
+                            row = sheet.GetRow(row_first);
+                            column_first = row.FirstCellNum;
+                            column_last = row.LastCellNum;
+
+                            for (int i = row_first; i <= row_last; i++)
                             {
-                                Get_Parameter_dgv.Rows[i].Cells[j].Value = sheet.GetRow(i).GetCell(j).StringCellValue;
+                                Get_Parameter_dgv.Rows.Add();
+                                for (int j = column_first; j < column_last; j++)
+                                {
+                                    Get_Parameter_dgv.Rows[i].Cells[j].Value = sheet.GetRow(i).GetCell(j).StringCellValue;
+                                }
                             }
-                        }
-                        wb.Close();
-                        break;
-                    case 2://第二个索引为.xlsx格式
-                        wb = new XSSFWorkbook(fs);
-                        sheet = (XSSFSheet)wb.GetSheet("Sheet1");
+                            wb.Close();
+                            break;
+                        case 2://第二个索引为.xls格式
+                            wb = new HSSFWorkbook(fs);
+                            sheet = (HSSFSheet)wb.GetSheet("Sheet1");
 
-                        //获取行数和列数
-                        row_first = sheet.FirstRowNum;
-                        row_last = sheet.LastRowNum;
-                        row = sheet.GetRow(row_first);
-                        column_first = row.FirstCellNum;
-                        column_last = row.LastCellNum;
-                        
-                        for (int i = row_first; i <= row_last; i++)
-                        {
-                            Get_Parameter_dgv.Rows.Add();
-                            for (int j = column_first; j < column_last; j++)
+                            //获取行数和列数、
+                            row_first = sheet.FirstRowNum;
+                            row_last = sheet.LastRowNum;
+                            row = sheet.GetRow(row_first);
+                            column_first = row.FirstCellNum;
+                            column_last = row.LastCellNum;
+
+                            for (int i = row_first; i <= row_last; i++)
                             {
-                                Get_Parameter_dgv.Rows[i].Cells[j].Value = sheet.GetRow(i).GetCell(j).StringCellValue;
+                                Get_Parameter_dgv.Rows.Add();
+                                for (int j = column_first; j < column_last; j++)
+                                {
+                                    Get_Parameter_dgv.Rows[i].Cells[j].Value = sheet.GetRow(i).GetCell(j).StringCellValue;
+                                }
                             }
-                        }
-                        wb.Close();
-                        break;
-                    case 3://第三个索引为.txt格式
-                        break;
+                            wb.Close();
+                            break;
+                        case 3://第三个索引为.txt格式
+                            break;
+                    }
+                    fs.Close();
                 }
-                fs.Close();
+            }
+            catch(Exception ex)
+            {
+                MessageBox.Show(ex.Message);
             }
         }
 
         private void Calc_btn_Click(object sender, EventArgs e)
         {
-            //获取DataGridView控件中的数据的行数
-            int rows_count = Get_Parameter_dgv.Rows.Count - 1;//因为最后一行为空，所以实际有效行数要减去1
+            //获取DataGridView控件中的数据的行数,即为公共点的个数
+            int point_count = Get_Parameter_dgv.Rows.Count - 1;
 
             switch (Coordinate_System)
             {
                 case Ellipsoid_Transfer_Form.GCS://大地坐标系
                     break;
                 case Ellipsoid_Transfer_Form.SRCS:
-                    var dX = new DenseVector(7);//待求转换参数向量δX
-                    var B = new DenseMatrix(rows_count * 3, 7);//系数阵
-                    var L = new DenseVector(rows_count * 3);//已知值向量
-                    var P = DenseMatrix.CreateIdentity(rows_count * 3);//权阵，设为单位阵
+                    var dX = new DenseMatrix(7, 1);//待求转换参数向量δX
+                    var B = new DenseMatrix(point_count * 3, 7);//系数阵
+                    var L = new DenseMatrix(point_count * 3, 1);//已知值向量
 
                     //读取坐标值
-                    for (int i = 0; i < rows_count - 1; i++)//每个点三个方程
+                    Ellipsoid_Transfer_Form.Common_Points.Rows.Clear();//清空公共点列表
+                    for (int i = 0; i < point_count; i++)//每个点三个方程
                     {
-                        Coordinate_System_Transfer.Coordinate_Value cv = new Coordinate_System_Transfer.Coordinate_Value();
+                        Point p_known = new Point();
+                        Point p_trans = new Point();
                         var b =new DenseMatrix(3, 7);
 
-                        cv.X = Convert.ToDouble(Get_Parameter_dgv.Rows[i].Cells[0].Value.ToString());
-                        cv.Y = Convert.ToDouble(Get_Parameter_dgv.Rows[i].Cells[1].Value.ToString());
-                        cv.Z = Convert.ToDouble(Get_Parameter_dgv.Rows[i].Cells[2].Value.ToString());
-                        b = Get_Matrix_B(cv);
+                        for(int j = 0; j < 3; j++)
+                        {
+                            p_known[j] = Convert.ToDouble(Get_Parameter_dgv.Rows[i].Cells[j].Value.ToString());
+                            p_trans[j] = Convert.ToDouble(Get_Parameter_dgv.Rows[i].Cells[j + 3].Value.ToString());
+                            L[3 * i + j,0] = p_trans[j];//对已知值向量赋值
+                        }
+
+                        //将公共点坐标保存在Common_Points表中
+                        DataRow row = Ellipsoid_Transfer_Form.Common_Points.NewRow();
+                        for (int j = 0; j < 3; j++)
+                        {
+                            row[j] = p_known[j];
+                            row[j + 3] = p_trans[j];
+                        }
+                        Ellipsoid_Transfer_Form.Common_Points.Rows.Add(row);
+
+                        b = Get_Matrix_B(p_known);
                         B.SetSubMatrix(3 * i, 0, b);//把b插入B中
-                        
-                        L[3 * i + 0] = Convert.ToDouble(Get_Parameter_dgv.Rows[i].Cells[3].Value.ToString());//X2
-                        L[3 * i + 1] = Convert.ToDouble(Get_Parameter_dgv.Rows[i].Cells[4].Value.ToString());//Y2
-                        L[3 * i + 2] = Convert.ToDouble(Get_Parameter_dgv.Rows[i].Cells[5].Value.ToString());//Z2
                     }
 
                     //法方程求解
-                    dX = (DenseVector)((B.Transpose() * B).Inverse() * B.Transpose() * L);//此为化简后的公式，原公式为:
+                    dX = (B.Transpose() * B).Inverse() * B.Transpose() * L as DenseMatrix;
 
                     //对全局变量赋值
-                    Ellipsoid_Transfer_Form.dXo = dX[0];
-                    Ellipsoid_Transfer_Form.dYo = dX[1];
-                    Ellipsoid_Transfer_Form.dZo = dX[2];
-                    Ellipsoid_Transfer_Form.m = dX[3] - 1;
-                    Ellipsoid_Transfer_Form.eX = dX[4] / dX[3];
-                    Ellipsoid_Transfer_Form.eY = dX[5] / dX[3];
-                    Ellipsoid_Transfer_Form.eZ = dX[6] / dX[3];
+                    Ellipsoid_Transfer_Form.dXo = dX[0, 0];
+                    Ellipsoid_Transfer_Form.dYo = dX[1, 0];
+                    Ellipsoid_Transfer_Form.dZo = dX[2, 0];
+                    Ellipsoid_Transfer_Form.m = dX[3, 0] - 1;
+                    Ellipsoid_Transfer_Form.eX = dX[4, 0] / dX[3, 0];
+                    Ellipsoid_Transfer_Form.eY = dX[5, 0] / dX[3, 0];
+                    Ellipsoid_Transfer_Form.eZ = dX[6, 0] / dX[3, 0];
                     Ellipsoid_Transfer_Form.Coordinate_System = Coordinate_System;
                     Ellipsoid_Transfer_Form.Known_Ellipsoid = Known_Ellipsoid;
                     Ellipsoid_Transfer_Form.Target_Ellipsoid = Target_Ellipsoid;
@@ -267,24 +285,22 @@ namespace MySystem
         /// <summary>
         /// 返回一个点的系数矩阵B（3*7）
         /// </summary>
-        /// <param name="cv"></param>
+        /// <param name="p"></param>
         /// <returns></returns>
-        public static DenseMatrix Get_Matrix_B(Coordinate_System_Transfer.Coordinate_Value cv)
+        public static DenseMatrix Get_Matrix_B(Point p)
         {
             DenseMatrix B = new DenseMatrix(3, 7);
             var I = DenseMatrix.CreateIdentity(3);
-            var b = new DenseMatrix(3, 4);
-            b[0, 0] = cv.X;
-            b[0, 2] = -cv.Z;
-            b[0, 3] = cv.Y;
-            b[1, 0] = cv.Y;
-            b[1, 1] = cv.Z;
-            b[1, 3] = -cv.X;
-            b[2, 0] = cv.Z;
-            b[2, 1] = -cv.Y;
-            b[2, 2] = cv.X;
+            var b = new DenseMatrix(3);
+            for(int i = 0; i < 3; i++)
+                B[i, 3] = p[i];
+            
+            b[0, 1] = -p.Z;
+            b[0, 2] = p.Y;
+            b[1, 2] = -p.X;
+            b -= b.Transpose() as DenseMatrix;
             B.SetSubMatrix(0, 0, I);
-            B.SetSubMatrix(0, 3, b);
+            B.SetSubMatrix(0, 4, b);
 
             return B;
         }

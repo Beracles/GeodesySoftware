@@ -19,6 +19,15 @@ namespace MySystem
         {
             InitializeComponent();
 
+            //实例化Common_Points
+            Common_Points = new DataTable();
+            Common_Points.Columns.Add("X1");
+            Common_Points.Columns.Add("Y1");
+            Common_Points.Columns.Add("Z1");
+            Common_Points.Columns.Add("X2");
+            Common_Points.Columns.Add("Y2");
+            Common_Points.Columns.Add("Z2");
+
             //刚打开此功能时，无法输入和转换，因为没有确定参数
             foreach (Control c in Input_gpBx.Controls)
                 c.Enabled = false;
@@ -111,6 +120,11 @@ namespace MySystem
         /// </summary>
         public static int Target_Ellipsoid_cbBx_SelectedIndex = Krassowski_eliipsoid;
 
+        /// <summary>
+        /// 公共点数据表
+        /// </summary>
+        public static DataTable Common_Points;
+
         //定义椭球体代号
         /// <summary>
         /// 克拉索夫斯基椭球体代号，值为0
@@ -142,7 +156,7 @@ namespace MySystem
         /// <summary>
         /// 坐标系名称列表0-GCS，1-SRCS
         /// </summary>
-        public static string[] coordinate_systems = new string[2] { "GCS", "SRCS" };
+        public static string[] coordinate_systems = new string[2] { "大地坐标系", "空间直角坐标系" };
 
         /// <summary>
         /// 大地坐标系代号0
@@ -369,15 +383,15 @@ namespace MySystem
                 return;
             }
 
-            Coordinate_System_Transfer.Coordinate_Value value_get = new Coordinate_System_Transfer.Coordinate_Value();
-            Coordinate_System_Transfer.Coordinate_Value value_show = new Coordinate_System_Transfer.Coordinate_Value();
+            Point p_get = new Point();
+            Point p_show = new Point();
 
-            value_get = Get_Coordinate();
+            p_get = Get_Coordinate();
 
             //输入有错误时，退出函数
-            if (value_get.X == Errors.Input_Illegal || value_get.X == Errors.Input_Out_of_Range ||
-                value_get.Y == Errors.Input_Illegal || value_get.Y == Errors.Input_Out_of_Range ||
-                value_get.Z == Errors.Input_Illegal)
+            if (p_get.X == Errors.Input_Illegal || p_get.X == Errors.Input_Out_of_Range ||
+                p_get.Y == Errors.Input_Illegal || p_get.Y == Errors.Input_Out_of_Range ||
+                p_get.Z == Errors.Input_Illegal)
             {
                 return;
             }
@@ -387,7 +401,7 @@ namespace MySystem
                 case 0://大地坐标系
                     break;
                 case 1://空间直角坐标系
-                    var B = Get_Parameter_Form.Get_Matrix_B(value_get);
+                    var B = Get_Parameter_Form.Get_Matrix_B(p_get);
                     var dX = new DenseVector(7);
                     dX[0] = dXo;
                     dX[1] = dYo;
@@ -397,14 +411,48 @@ namespace MySystem
                     dX[5] = dX[3] * eY;
                     dX[6] = dX[3] * eZ;
 
+                    //计算公共点转换值的改正数向量
+                    int point_count = Common_Points.Rows.Count;//获取公共点的个数
+                    var V = new DenseMatrix(3, 1);//单个点的转换值改正数向量
+                    var PV_sum = new DenseMatrix(3, 1);//加权改正数之和
+                    double P_sum = 0;//总权
+                    double P;//权
+                    Point origin_point = new Point();//公共点原点
+                    Point target_point = new Point();//公共点目标点
+
                     //计算
-                    var Result = B * dX;
-                    value_show.X = Result[0];
-                    value_show.Y = Result[1];
-                    value_show.Z = Result[2];
+                    var Result = B * dX.ToColumnMatrix();//正常算
+                    //将正常算的结果转换成点
+                    Point result_point = new Point();
+                    for (int i = 0; i < 3; i++)
+                    {
+                        result_point[i] = Result[i, 0];
+                    }
+                    //配置法
+                    for (int i = 0; i < point_count; i++)
+                    {
+                        for(int j = 0; j < 3; j++)
+                        {
+                            origin_point[j] = Convert.ToDouble(Common_Points.Rows[i].ItemArray[j].ToString());//获取公共点原点
+                            target_point[j] = Convert.ToDouble(Common_Points.Rows[i].ItemArray[j + 3].ToString());//获取公共点目标点
+                        }
+                        //求转换值改正数
+                        V = (DenseMatrix)(target_point.ToColumnVector() - Get_Parameter_Form.Get_Matrix_B(origin_point) * dX.ToColumnMatrix());
+
+                        P = 1 / Math.Pow(Point.Distance(p_get, origin_point), 2);//计算权
+                        PV_sum += P * V;
+                        P_sum += P;
+                    }
+
+                    Result += PV_sum / P_sum as DenseMatrix;//配置法
+
+                    for (int i = 0; i < 3; i++)
+                    {
+                        p_show[i] = Result[i,0];
+                    }
 
                     //显示结果
-                    Coordinate_Show(value_show);
+                    Coordinate_Show(p_show);
                     break;
             }
         }
@@ -467,6 +515,7 @@ namespace MySystem
                 {
                     case 1://mat文件
                         //读取
+                        //参数
                         var paras = new DenseVector(12);
                         paras[0] = Coordinate_System;//坐标系
                         paras[1] = Known_Ellipsoid;//已知椭球体
@@ -480,13 +529,23 @@ namespace MySystem
                         paras[9] = eZ;
                         paras[10] = da;
                         paras[11] = daf;
+                        //坐标
+                        var common_points = new DenseMatrix(Common_Points.Rows.Count, Common_Points.Columns.Count);//坐标矩阵
+                        for(int i = 0; i < common_points.RowCount; i++)
+                        {
+                            for(int j = 0; j < common_points.ColumnCount; j++)
+                            {
+                                common_points[i, j] = (double)Common_Points.Rows[i].ItemArray[j];
+                            }
+                        }
 
                         //写入
                         path = sfd.FileName + (sfd.FileName.Contains(".mat") ? "" : ".mat");
                         var mat = paras.ToColumnMatrix();
                         List<MatlabMatrix> parameter = new List<MatlabMatrix>()
                         {
-                            MatlabWriter.Pack(mat,"parameters")
+                            MatlabWriter.Pack(mat,"parameters"),//参数
+                            MatlabWriter.Pack(common_points,"common_points")//坐标
                         };
                         MatlabWriter.Store(path, parameter);
                         break;
@@ -495,6 +554,8 @@ namespace MySystem
                         path = sfd.FileName + (sfd.FileName.Contains(".txt") ? "" : ".txt");
                         FileStream fs = new FileStream(path, FileMode.Create, FileAccess.Write);
                         StreamWriter sw = new StreamWriter(fs);
+                        //写入
+                        //参数
                         sw.WriteLine(Coordinate_System.ToString());//坐标系
                         sw.WriteLine(Known_Ellipsoid.ToString());//已知椭球体
                         sw.WriteLine(Target_Ellipsoid.ToString());//目标椭球体
@@ -507,6 +568,16 @@ namespace MySystem
                         sw.WriteLine(eZ.ToString());
                         sw.WriteLine(da.ToString());
                         sw.WriteLine(daf.ToString());
+                        //坐标
+                        for(int i = 0; i < Common_Points.Rows.Count; i++)
+                        {
+                            string row_txt = "";
+                            for(int j = 0; j < Common_Points.Columns.Count; j++)
+                            {
+                                row_txt += Common_Points.Rows[i].ItemArray[j].ToString() + " ";
+                            }
+                            sw.WriteLine(row_txt);
+                        }
                         sw.Close();
                         fs.Close();
                         break;
@@ -531,9 +602,11 @@ namespace MySystem
                     case 1:
                         //读取
                         DenseMatrix paras = (DenseMatrix)MatlabReader.Read<double>(ofd.FileName, "parameters");
+                        DenseMatrix common_points = (DenseMatrix)MatlabReader.Read<double>(ofd.FileName, "common_points");
                         DenseVector parameters = (DenseVector)paras.Column(0);
-
+                                                
                         //赋值
+                        //参数
                         Coordinate_System = (int)parameters[0];
                         Known_Ellipsoid = (int)parameters[1];
                         Target_Ellipsoid = (int)parameters[2];
@@ -546,11 +619,23 @@ namespace MySystem
                         eZ = parameters[9];
                         da = parameters[10];
                         daf = parameters[11];
+                        //公共点
+                        Common_Points.Rows.Clear();
+                        for(int i = 0; i < common_points.RowCount; i++)
+                        {
+                            DataRow row = Common_Points.NewRow();
+                            for(int j = 0; j < common_points.ColumnCount; j++)
+                            {
+                                row[j] = common_points[i, j];
+                            }
+                            Common_Points.Rows.Add(row);
+                        }
                         break;
                     case 2:
                         FileStream fs = new FileStream(ofd.FileName, FileMode.Open, FileAccess.Read);
                         StreamReader sr = new StreamReader(fs);
-                        //读取的同时写入
+                        //读取
+                        //参数
                         Coordinate_System = Convert.ToInt32(sr.ReadLine());
                         Known_Ellipsoid = Convert.ToInt32(sr.ReadLine());
                         Target_Ellipsoid = Convert.ToInt32(sr.ReadLine());
@@ -563,6 +648,19 @@ namespace MySystem
                         eZ = Convert.ToDouble(sr.ReadLine());
                         da = Convert.ToDouble(sr.ReadLine());
                         daf = Convert.ToDouble(sr.ReadLine());
+                        //坐标
+                        Common_Points.Rows.Clear();
+                        string row_txt;
+                        while ((row_txt = sr.ReadLine()) != null)
+                        {
+                            string[] values = row_txt.Split(' ');
+                            DataRow row = Common_Points.NewRow();
+                            for(int i = 0; i < Common_Points.Columns.Count; i++)
+                            {
+                                row[i] = Convert.ToDouble(values[i]);
+                            }
+                            Common_Points.Rows.Add(row);
+                        }
 
                         sr.Close();
                         fs.Close();
@@ -601,9 +699,9 @@ namespace MySystem
         /// <summary>
         /// 将文本框中的文本坐标数据转换为double类型，并返回三维坐标(X,Y,Z)
         /// </summary>
-        private Coordinate_System_Transfer.Coordinate_Value Get_Coordinate()
+        private Point Get_Coordinate()
         {
-            Coordinate_System_Transfer.Coordinate_Value cv = new Coordinate_System_Transfer.Coordinate_Value();
+            Point p = new Point();
 
             //定义次数变量，记录错误的个数，用于判断对应的错误提示语前是否要加逗号
             int times = 0;
@@ -648,16 +746,16 @@ namespace MySystem
                             }
                             tips += "\n";
                             times = 0;//使用后归零
-                            cv.X = Errors.Input_Out_of_Range;//输入超出范围
+                            p.X = Errors.Input_Out_of_Range;//输入超出范围
                         }
                         else
                         {
-                            cv.X = Coordinate_System_Transfer.Abs1(deg) + min / 60 + sec / 3600; //度分秒转化为度
-                            cv.X *= x1_Deg_txtBx.Text[0] == '-' ? -1 : 1;
-                            if (cv.X > 90 || cv.X < -90)
+                            p.X = Coordinate_System_Transfer.Abs1(deg) + min / 60 + sec / 3600; //度分秒转化为度
+                            p.X *= x1_Deg_txtBx.Text[0] == '-' ? -1 : 1;
+                            if (p.X > 90 || p.X < -90)
                             {
                                 tips += x1_lbl.Text + "纬度值应满足[-90,90]";
-                                cv.X = Errors.Input_Out_of_Range;//输入超出范围
+                                p.X = Errors.Input_Out_of_Range;//输入超出范围
                             }
                         }
                     }
@@ -682,16 +780,16 @@ namespace MySystem
                             }
                             tips += "\n";
                             times = 0;//使用后归零
-                            cv.X = Errors.Input_Out_of_Range;//输入超出范围
+                            p.X = Errors.Input_Out_of_Range;//输入超出范围
                         }
                         else
                         {
-                            cv.X = Coordinate_System_Transfer.Abs1(deg) + min / 60 + sec / 3600; //度分秒转化为度
-                            cv.X *= x1_Deg_txtBx.Text[0] == '-' ? -1 : 1;
-                            if (cv.X > 180 || cv.X < -180)
+                            p.X = Coordinate_System_Transfer.Abs1(deg) + min / 60 + sec / 3600; //度分秒转化为度
+                            p.X *= x1_Deg_txtBx.Text[0] == '-' ? -1 : 1;
+                            if (p.X > 180 || p.X < -180)
                             {
                                 tips += x1_lbl.Text + "经度值值应满足[-180,180]";
-                                cv.X = Errors.Input_Out_of_Range;//输入超出范围
+                                p.X = Errors.Input_Out_of_Range;//输入超出范围
                             }
                         }
                     }
@@ -699,17 +797,17 @@ namespace MySystem
                 else
                 {
                     tips += x1_lbl.Text + "不是合法的角度值\n";
-                    cv.X = Errors.Input_Illegal;
+                    p.X = Errors.Input_Illegal;
                 }
             }
             else
             {
                 if (Num_Check(x1_txtBx.Text))
-                    cv.X = Convert.ToDouble(x1_txtBx.Text);
+                    p.X = Convert.ToDouble(x1_txtBx.Text);
                 else
                 {
                     tips += x1_lbl.Text + "不是合法的数值\n";
-                    cv.X = Errors.Input_Illegal;
+                    p.X = Errors.Input_Illegal;
                 }
             }
             //y1
@@ -747,66 +845,66 @@ namespace MySystem
                         }
                         tips += "\n";
                         times = 0;//使用后归零
-                        cv.Y = Errors.Input_Out_of_Range;//输入超出范围
+                        p.Y = Errors.Input_Out_of_Range;//输入超出范围
                     }
                     else
                     {
-                        cv.Y = Coordinate_System_Transfer.Abs1(deg) + min / 60 + sec / 3600; //度分秒转化为度
-                        cv.Y *= y1_Deg_txtBx.Text[0] == '-' ? -1 : 1;
-                        if (cv.Y > 180 || cv.Y < -180)
+                        p.Y = Coordinate_System_Transfer.Abs1(deg) + min / 60 + sec / 3600; //度分秒转化为度
+                        p.Y *= y1_Deg_txtBx.Text[0] == '-' ? -1 : 1;
+                        if (p.Y > 180 || p.Y < -180)
                         {
                             tips += y1_lbl.Text + "经度值值应满足[-180,180]";
-                            cv.Y = Errors.Input_Out_of_Range;//输入超出范围
+                            p.Y = Errors.Input_Out_of_Range;//输入超出范围
                         }
                     }
                 }
                 else
                 {
                     tips += y1_lbl.Text + "不是合法的角度值\n";
-                    cv.Y = Errors.Input_Illegal;
+                    p.Y = Errors.Input_Illegal;
                 }
             }
             else
             {
                 if (Num_Check(y1_txtBx.Text))
-                    cv.Y = Convert.ToDouble(y1_txtBx.Text);
+                    p.Y = Convert.ToDouble(y1_txtBx.Text);
                 else
                 {
                     tips += y1_lbl.Text + "不是合法的数值\n";
-                    cv.Y = Errors.Input_Illegal;
+                    p.Y = Errors.Input_Illegal;
                 }
             }
             //z1
             if (Num_Check(z1_txtBx.Text))
-                cv.Z = Convert.ToDouble(z1_txtBx.Text);
+                p.Z = Convert.ToDouble(z1_txtBx.Text);
             else
             {
                 tips += z1_lbl.Text + "不是合法的数值\n";
-                cv.Z = Errors.Input_Illegal;
+                p.Z = Errors.Input_Illegal;
             }
 
-            if (cv.X == Errors.Input_Illegal || cv.X == Errors.Input_Out_of_Range ||
-                cv.Y == Errors.Input_Illegal || cv.Y == Errors.Input_Out_of_Range ||
-                cv.Z == Errors.Input_Illegal)
+            if (p.X == Errors.Input_Illegal || p.X == Errors.Input_Out_of_Range ||
+                p.Y == Errors.Input_Illegal || p.Y == Errors.Input_Out_of_Range ||
+                p.Z == Errors.Input_Illegal)
             {
                 //输入错误时，弹窗提示
                 MessageBox.Show("输入错误：\n" + tips, "ERROR", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 tips = "";
             }
 
-            return cv;
+            return p;
         }
         
         /// <summary>
         /// 将点的三维坐标数据输出到文本框中
         /// </summary>
-        private void Coordinate_Show(Coordinate_System_Transfer.Coordinate_Value cv)
+        private void Coordinate_Show(Point p)
         {
             string tip = "";    //存储输出值不确定坐标对应的坐标变量
             int times = 0;      //记录tip长度增加的次数是否大于0，大于0时则在要添加到tip后面的坐标变量前加一个逗号
 
             //x2
-            if (cv.X == Errors.Cant_Transfer)
+            if (p.X == Errors.Cant_Transfer)
             {
                 tip += x2_lbl.Text[0];
                 times++;
@@ -817,9 +915,9 @@ namespace MySystem
                 {
                     double deg, min, sec;
                     //其他全部取绝对值
-                    deg = Math.Truncate(cv.X);//度(°)
-                    min = Math.Truncate((cv.X - deg) * 60);//分(')
-                    sec = Coordinate_System_Transfer.Abs1((cv.X - deg - min / 60) * 3600);//秒(")
+                    deg = Math.Truncate(p.X);//度(°)
+                    min = Math.Truncate((p.X - deg) * 60);//分(')
+                    sec = Coordinate_System_Transfer.Abs1((p.X - deg - min / 60) * 3600);//秒(")
                     min = Coordinate_System_Transfer.Abs1(min);
                     deg = Coordinate_System_Transfer.Abs1(deg);
                     if (double.Parse(sec.ToString("f2")) == 60)
@@ -834,15 +932,15 @@ namespace MySystem
                     }
 
                     //保留有效数字时，进行角度进制转换
-                    x2_Deg_txtBx.Text = (cv.X < 0 ? "-" : "") + deg.ToString();
+                    x2_Deg_txtBx.Text = (p.X < 0 ? "-" : "") + deg.ToString();
                     x2_Min_txtBx.Text = min.ToString();
                     x2_Sec_txtBx.Text = sec.ToString("f2");
                 }
                 else
-                    x2_txtBx.Text = cv.X.ToString("G");
+                    x2_txtBx.Text = p.X.ToString("G");
             }
             //y2
-            if (cv.Y == Errors.Cant_Transfer)
+            if (p.Y == Errors.Cant_Transfer)
             {
                 tip += (times > 0 ? "," : "") + y2_lbl.Text[0];
                 times++;
@@ -854,9 +952,9 @@ namespace MySystem
                     double deg, min, sec;
 
                     //其他全部取绝对值
-                    deg = Math.Truncate(cv.Y);              //度(°)
-                    min = Math.Truncate((cv.Y - deg) * 60); //分(')
-                    sec = Coordinate_System_Transfer.Abs1((cv.Y - deg - min / 60) * 3600);   //秒(")
+                    deg = Math.Truncate(p.Y);              //度(°)
+                    min = Math.Truncate((p.Y - deg) * 60); //分(')
+                    sec = Coordinate_System_Transfer.Abs1((p.Y - deg - min / 60) * 3600);   //秒(")
                     min = Coordinate_System_Transfer.Abs1(min);
                     deg = Coordinate_System_Transfer.Abs1(deg);
 
@@ -872,21 +970,21 @@ namespace MySystem
                         deg++;
                     }
 
-                    y2_Deg_txtBx.Text = (cv.Y < 0 ? "-" : "") + deg.ToString();
+                    y2_Deg_txtBx.Text = (p.Y < 0 ? "-" : "") + deg.ToString();
                     y2_Min_txtBx.Text = min.ToString();
                     y2_Sec_txtBx.Text = sec.ToString("f2");
                 }
                 else
-                    y2_txtBx.Text = cv.Y.ToString().Length >= 16 ? cv.Y.ToString("f" + (16 - Math.Truncate(cv.Y).ToString().Length).ToString()) : cv.Y.ToString("G");
+                    y2_txtBx.Text = p.Y.ToString().Length >= 16 ? p.Y.ToString("f" + (16 - Math.Truncate(p.Y).ToString().Length).ToString()) : p.Y.ToString("G");
             }
             //z2
-            if (cv.Z == Errors.Cant_Transfer)
+            if (p.Z == Errors.Cant_Transfer)
                 tip += (times > 0 ? "," : "") + y2_lbl.Text[0];
             else
-                z2_txtBx.Text = cv.Z.ToString().Length >= 16 ? cv.Z.ToString("f" + (16 - Math.Truncate(cv.Z).ToString().Length).ToString()) : cv.Z.ToString("G");
+                z2_txtBx.Text = p.Z.ToString().Length >= 16 ? p.Z.ToString("f" + (16 - Math.Truncate(p.Z).ToString().Length).ToString()) : p.Z.ToString("G");
 
             //当有坐标值无法确定是弹窗提示
-            if (cv.X == Errors.Cant_Transfer || cv.Y == Errors.Cant_Transfer || cv.Z == Errors.Cant_Transfer)
+            if (p.X == Errors.Cant_Transfer || p.Y == Errors.Cant_Transfer || p.Z == Errors.Cant_Transfer)
                 MessageBox.Show("坐标值：" + tip + "无法确定！", "Tip", MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
 
@@ -929,7 +1027,7 @@ namespace MySystem
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        private void InputBx_Got_Focus(object sender, EventArgs e)
+        public void InputBx_Got_Focus(object sender, EventArgs e)
         {
             TextBox tb = (TextBox)sender;
             if (tb.Text == "0")
@@ -941,7 +1039,7 @@ namespace MySystem
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        private void InputBx_Lose_Focus(object sender, EventArgs e)
+        public void InputBx_Lose_Focus(object sender, EventArgs e)
         {
             TextBox tb = (TextBox)sender;
             if (tb.Text == "")

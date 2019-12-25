@@ -27,6 +27,13 @@ namespace MySystem
             eX_txtBx.Text = Ellipsoid_Transfer_Form.eX.ToString();
             eY_txtBx.Text = Ellipsoid_Transfer_Form.eY.ToString();
             eZ_txtBx.Text = Ellipsoid_Transfer_Form.eZ.ToString();
+
+            Common_Points_dgv.DataSource = Ellipsoid_Transfer_Form.Common_Points;//设置公共点数据表的数据源s
+            //设置表的列宽
+            for(int i = 0; i < Common_Points_dgv.Columns.Count; i++)
+            {
+                Common_Points_dgv.Columns[i].Width = Common_Points_dgv.Width / Common_Points_dgv.Columns.Count;
+            }
             
             //大地坐标系时显示
             if(Ellipsoid_Transfer_Form.Coordinate_System == Ellipsoid_Transfer_Form.GCS)
@@ -57,6 +64,11 @@ namespace MySystem
         private void Search_Parameter_Form_FormClosing(object sender, FormClosingEventArgs e)
         {
             Ellipsoid_Transfer_Form.form = null;
+        }
+
+        private void Search_Parameter_Form_MouseClick(object sender, MouseEventArgs e)
+        {
+            this.ActiveControl = null;
         }
     }
 }

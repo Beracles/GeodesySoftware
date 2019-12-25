@@ -10,6 +10,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Runtime.InteropServices;
+using MathNet.Numerics.LinearAlgebra.Double;
 
 namespace MySystem
 {
@@ -255,16 +256,16 @@ namespace MySystem
                 return;
 
             //临时变量,p1存储由文本框转换来的坐标数据，p2存储坐标转换后的坐标数据
-            Coordinate_System_Transfer.Coordinate_Value value_get = new Coordinate_System_Transfer.Coordinate_Value();
-            Coordinate_System_Transfer.Coordinate_Value value_show = new Coordinate_System_Transfer.Coordinate_Value();
+            Point p_get = new Point();
+            Point p_show = new Point();
 
             //获取当前文本框中输入的坐标值
-            value_get = Get_Coordinate();
+            p_get = Get_Coordinate();
 
             //输入有错误时，退出函数
-            if (value_get.X == Errors.Input_Illegal || value_get.X == Errors.Input_Out_of_Range ||
-                value_get.Y == Errors.Input_Illegal || value_get.Y == Errors.Input_Out_of_Range ||
-                value_get.Z == Errors.Input_Illegal)
+            if (p_get.X == Errors.Input_Illegal || p_get.X == Errors.Input_Out_of_Range ||
+                p_get.Y == Errors.Input_Illegal || p_get.Y == Errors.Input_Out_of_Range ||
+                p_get.Z == Errors.Input_Illegal)
             {
                 return;
             }
@@ -277,10 +278,10 @@ namespace MySystem
                     switch (Target_Coordinate_cbBxs[0].SelectedIndex)   //判断目标坐标系是第几个，0-大地，1-子午，2-空间
                     {
                         case 0:
-                            value_show = Coordinate_System_Transfer.GCStoMRACS(value_get, Setting.ellipsoids[Setting.Current_Ellipsoid]); //大地坐标系转子午面直角坐标系
+                            p_show = Coordinate_System_Transfer.GCStoMRACS(p_get, Setting.ellipsoids[Setting.Current_Ellipsoid]); //大地坐标系转子午面直角坐标系
                             break;
                         case 1:
-                            value_show = Coordinate_System_Transfer.GCStoSRCS(value_get, Setting.ellipsoids[Setting.Current_Ellipsoid]);  //大地坐标系转空间坐标系
+                            p_show = Coordinate_System_Transfer.GCStoSRCS(p_get, Setting.ellipsoids[Setting.Current_Ellipsoid]);  //大地坐标系转空间坐标系
                             break;
                     }
                     break;
@@ -289,10 +290,10 @@ namespace MySystem
                     {
                         case 0:
                             //子午面直角坐标系转大地坐标系:先子午转空间，再空间转大地
-                            value_show = Coordinate_System_Transfer.SRCStoGCS(Coordinate_System_Transfer.MRACStoSRCS(value_get), Setting.ellipsoids[Setting.Current_Ellipsoid]);
+                            p_show = Coordinate_System_Transfer.SRCStoGCS(Coordinate_System_Transfer.MRACStoSRCS(p_get), Setting.ellipsoids[Setting.Current_Ellipsoid]);
                             break;
                         case 1:
-                            value_show = Coordinate_System_Transfer.MRACStoSRCS(value_get);           //子午面直角坐标系转空间坐标系
+                            p_show = Coordinate_System_Transfer.MRACStoSRCS(p_get);           //子午面直角坐标系转空间坐标系
                             break;
                     }
                     break;
@@ -300,23 +301,23 @@ namespace MySystem
                     switch (Target_Coordinate_cbBxs[2].SelectedIndex)
                     {
                         case 0:
-                            value_show = Coordinate_System_Transfer.SRCStoGCS(value_get, Setting.ellipsoids[Setting.Current_Ellipsoid]);  //空间坐标系转大地坐标系
+                            p_show = Coordinate_System_Transfer.SRCStoGCS(p_get, Setting.ellipsoids[Setting.Current_Ellipsoid]);  //空间坐标系转大地坐标系
                             break;
                         case 1:
-                            value_show = Coordinate_System_Transfer.SRCStoMRACS(value_get);           //空间坐标系转子午面直角坐标系
+                            p_show = Coordinate_System_Transfer.SRCStoMRACS(p_get);           //空间坐标系转子午面直角坐标系
                             break;
                     }
                     break;
             }
-            Coordinate_Show(value_show);
+            Coordinate_Show(p_show);
         }
 
         /// <summary>
         /// 将文本框中的文本坐标数据转换为double类型，并返回三维坐标(X,Y,Z)
         /// </summary>
-        private Coordinate_System_Transfer.Coordinate_Value Get_Coordinate()
+        private Point Get_Coordinate()
         {
-            Coordinate_System_Transfer.Coordinate_Value cv=new Coordinate_System_Transfer.Coordinate_Value();
+            Point p =new Point();
             
             //定义次数变量，记录错误的个数，用于判断对应的错误提示语前是否要加逗号
             int times = 0;
@@ -361,16 +362,16 @@ namespace MySystem
                             }
                             tips += "\n";
                             times = 0;//使用后归零
-                            cv.X = Errors.Input_Out_of_Range;//输入超出范围
+                            p.X = Errors.Input_Out_of_Range;//输入超出范围
                         }
                         else
                         {
-                            cv.X = Coordinate_System_Transfer.Abs1(deg) + min / 60 + sec / 3600; //度分秒转化为度
-                            cv.X *= x1_Deg_txtBx.Text[0] == '-' ? -1 : 1;
-                            if (cv.X > 90 || cv.X < -90)
+                            p.X = Coordinate_System_Transfer.Abs1(deg) + min / 60 + sec / 3600; //度分秒转化为度
+                            p.X *= x1_Deg_txtBx.Text[0] == '-' ? -1 : 1;
+                            if (p.X > 90 || p.X < -90)
                             {
                                 tips += x1_lbl.Text + "纬度值应满足[-90,90]";
-                                cv.X = Errors.Input_Out_of_Range;//输入超出范围
+                                p.X = Errors.Input_Out_of_Range;//输入超出范围
                             }
                         }
                     }
@@ -395,16 +396,16 @@ namespace MySystem
                             }
                             tips += "\n";
                             times = 0;//使用后归零
-                            cv.X = Errors.Input_Out_of_Range;//输入超出范围
+                            p.X = Errors.Input_Out_of_Range;//输入超出范围
                         }
                         else
                         {
-                            cv.X = Coordinate_System_Transfer.Abs1(deg) + min / 60 + sec / 3600; //度分秒转化为度
-                            cv.X *= x1_Deg_txtBx.Text[0] == '-' ? -1 : 1;
-                            if (cv.X > 180 || cv.X < -180)
+                            p.X = Coordinate_System_Transfer.Abs1(deg) + min / 60 + sec / 3600; //度分秒转化为度
+                            p.X *= x1_Deg_txtBx.Text[0] == '-' ? -1 : 1;
+                            if (p.X > 180 || p.X < -180)
                             {
                                 tips += x1_lbl.Text + "经度值值应满足[-180,180]";
-                                cv.X = Errors.Input_Out_of_Range;//输入超出范围
+                                p.X = Errors.Input_Out_of_Range;//输入超出范围
                             }
                         }
                     }
@@ -412,17 +413,17 @@ namespace MySystem
                 else
                 {
                     tips += x1_lbl.Text + "不是合法的角度值\n";
-                    cv.X = Errors.Input_Illegal;
+                    p.X = Errors.Input_Illegal;
                 }
             }
             else
             {
                 if (Num_Check(x1_txtBx.Text))
-                    cv.X = Convert.ToDouble(x1_txtBx.Text);
+                    p.X = Convert.ToDouble(x1_txtBx.Text);
                 else
                 {
                     tips += x1_lbl.Text + "不是合法的数值\n";
-                    cv.X = Errors.Input_Illegal;
+                    p.X = Errors.Input_Illegal;
                 }
             }
             //y1
@@ -460,66 +461,66 @@ namespace MySystem
                         }
                         tips += "\n";
                         times = 0;//使用后归零
-                        cv.Y = Errors.Input_Out_of_Range;//输入超出范围
+                        p.Y = Errors.Input_Out_of_Range;//输入超出范围
                     }
                     else
                     {
-                        cv.Y = Coordinate_System_Transfer.Abs1(deg) + min / 60 + sec / 3600; //度分秒转化为度
-                        cv.Y *= y1_Deg_txtBx.Text[0] == '-' ? -1 : 1;
-                        if (cv.Y > 180 || cv.Y < -180)
+                        p.Y = Coordinate_System_Transfer.Abs1(deg) + min / 60 + sec / 3600; //度分秒转化为度
+                        p.Y *= y1_Deg_txtBx.Text[0] == '-' ? -1 : 1;
+                        if (p.Y > 180 || p.Y < -180)
                         {
                             tips += y1_lbl.Text + "经度值值应满足[-180,180]";
-                            cv.Y = Errors.Input_Out_of_Range;//输入超出范围
+                            p.Y = Errors.Input_Out_of_Range;//输入超出范围
                         }
                     }
                 }
                 else
                 {
                     tips += y1_lbl.Text + "不是合法的角度值\n";
-                    cv.Y = Errors.Input_Illegal;
+                    p.Y = Errors.Input_Illegal;
                 }
             }
             else
             {
                 if (Num_Check(y1_txtBx.Text))
-                    cv.Y = Convert.ToDouble(y1_txtBx.Text);
+                    p.Y = Convert.ToDouble(y1_txtBx.Text);
                 else
                 {
                     tips += y1_lbl.Text + "不是合法的数值\n";
-                    cv.Y = Errors.Input_Illegal;
+                    p.Y = Errors.Input_Illegal;
                 }
             }
             //z1
             if (Num_Check(z1_txtBx.Text))
-                cv.Z = Convert.ToDouble(z1_txtBx.Text);
+                p.Z = Convert.ToDouble(z1_txtBx.Text);
             else
             {
                 tips += z1_lbl.Text + "不是合法的数值\n";
-                cv.Z = Errors.Input_Illegal;
+                p.Z = Errors.Input_Illegal;
             }
 
-            if (cv.X == Errors.Input_Illegal || cv.X==Errors.Input_Out_of_Range || 
-                cv.Y == Errors.Input_Illegal || cv.Y==Errors.Input_Out_of_Range || 
-                cv.Z == Errors.Input_Illegal)
+            if (p.X == Errors.Input_Illegal || p.X==Errors.Input_Out_of_Range || 
+                p.Y == Errors.Input_Illegal || p.Y==Errors.Input_Out_of_Range || 
+                p.Z == Errors.Input_Illegal)
             {
                 //输入错误时，弹窗提示
                 MessageBox.Show("输入错误：\n" + tips, "ERROR", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 tips = "";
             }  
 
-            return cv;
+            return p;
         }
 
         /// <summary>
         /// 将点的三维坐标数据输出到文本框中
         /// </summary>
-        private void Coordinate_Show(Coordinate_System_Transfer.Coordinate_Value cv)
+        private void Coordinate_Show(Point p)
         {
             string tip = "";    //存储输出值不确定坐标对应的坐标变量
             int times = 0;      //记录tip长度增加的次数是否大于0，大于0时则在要添加到tip后面的坐标变量前加一个逗号
 
             //x2
-            if (cv.X == Errors.Cant_Transfer)
+            if (p.X == Errors.Cant_Transfer)
             {
                 tip += x2_lbl.Text[0];
                 times++;
@@ -530,9 +531,9 @@ namespace MySystem
                 {
                     double deg, min, sec;
                     //其他全部取绝对值
-                    deg = Math.Truncate(cv.X);//度(°)
-                    min = Math.Truncate((cv.X - deg) * 60);//分(')
-                    sec = Coordinate_System_Transfer.Abs1((cv.X - deg - min / 60) * 3600);//秒(")
+                    deg = Math.Truncate(p.X);//度(°)
+                    min = Math.Truncate((p.X - deg) * 60);//分(')
+                    sec = Coordinate_System_Transfer.Abs1((p.X - deg - min / 60) * 3600);//秒(")
                     min = Coordinate_System_Transfer.Abs1(min);
                     deg = Coordinate_System_Transfer.Abs1(deg);
                     if(double.Parse(sec.ToString("f2"))==60)
@@ -547,15 +548,15 @@ namespace MySystem
                     }
 
                     //保留有效数字时，进行角度进制转换
-                    x2_Deg_txtBx.Text = (cv.X < 0 ? "-" : "") + deg.ToString();
+                    x2_Deg_txtBx.Text = (p.X < 0 ? "-" : "") + deg.ToString();
                     x2_Min_txtBx.Text = min.ToString();
                     x2_Sec_txtBx.Text = sec.ToString("f2");
                 }
                 else
-                    x2_txtBx.Text = cv.X.ToString("G");
+                    x2_txtBx.Text = p.X.ToString("G");
             }
             //y2
-            if (cv.Y == Errors.Cant_Transfer)
+            if (p.Y == Errors.Cant_Transfer)
             {
                 tip += (times > 0 ? "," : "") + y2_lbl.Text[0];
                 times++;
@@ -567,9 +568,9 @@ namespace MySystem
                     double deg, min, sec;
 
                     //其他全部取绝对值
-                    deg = Math.Truncate(cv.Y);              //度(°)
-                    min = Math.Truncate((cv.Y - deg) * 60); //分(')
-                    sec = Coordinate_System_Transfer.Abs1((cv.Y - deg - min / 60) * 3600);   //秒(")
+                    deg = Math.Truncate(p.Y);              //度(°)
+                    min = Math.Truncate((p.Y - deg) * 60); //分(')
+                    sec = Coordinate_System_Transfer.Abs1((p.Y - deg - min / 60) * 3600);   //秒(")
                     min = Coordinate_System_Transfer.Abs1(min);
                     deg = Coordinate_System_Transfer.Abs1(deg);
 
@@ -585,21 +586,21 @@ namespace MySystem
                         deg++;
                     }
 
-                    y2_Deg_txtBx.Text = (cv.Y < 0 ? "-" : "") + deg.ToString();
+                    y2_Deg_txtBx.Text = (p.Y < 0 ? "-" : "") + deg.ToString();
                     y2_Min_txtBx.Text = min.ToString();
                     y2_Sec_txtBx.Text = sec.ToString("f2");
                 }
                 else
-                    y2_txtBx.Text = cv.Y.ToString().Length >= 16 ? cv.Y.ToString("f" + (16 - Math.Truncate(cv.Y).ToString().Length).ToString()) : cv.Y.ToString("G");
+                    y2_txtBx.Text = p.Y.ToString().Length >= 16 ? p.Y.ToString("f" + (16 - Math.Truncate(p.Y).ToString().Length).ToString()) : p.Y.ToString("G");
             }
             //z2
-            if (cv.Z == Errors.Cant_Transfer)
+            if (p.Z == Errors.Cant_Transfer)
                 tip += (times > 0 ? "," : "") + y2_lbl.Text[0];
             else
-                z2_txtBx.Text = cv.Z.ToString().Length >= 16 ? cv.Z.ToString("f" + (16 - Math.Truncate(cv.Z).ToString().Length).ToString()) : cv.Z.ToString("G");
+                z2_txtBx.Text = p.Z.ToString().Length >= 16 ? p.Z.ToString("f" + (16 - Math.Truncate(p.Z).ToString().Length).ToString()) : p.Z.ToString("G");
 
             //当有坐标值无法确定是弹窗提示
-            if (cv.X == Errors.Cant_Transfer || cv.Y == Errors.Cant_Transfer || cv.Z == Errors.Cant_Transfer)
+            if (p.X == Errors.Cant_Transfer || p.Y == Errors.Cant_Transfer || p.Z == Errors.Cant_Transfer)
                 MessageBox.Show("坐标值：" + tip + "无法确定！", "Tip", MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
 
@@ -679,6 +680,212 @@ namespace MySystem
         }
     }
 
+    /// <summary>
+    /// double点类型
+    /// </summary>
+    public class Point
+    {
+        #region 属性
+        private double x;
+        private double y;
+        private double z;
+        //封装
+        public double X
+        {
+            get
+            {
+                return x;
+            }
+            set
+            {
+                x = value;
+            }
+        }
+        public double Y
+        {
+            get
+            {
+                return y;
+            }
+            set
+            {
+                y = value;
+            }
+        }
+        public double Z
+        {
+            get
+            {
+                return z;
+            }
+            set
+            {
+                z = value;
+            }
+        }
+        /// <summary>
+        /// 点的坐标值列表
+        /// </summary>
+        public double this[int i]
+        {
+            get
+            {
+                switch (i)
+                {
+                    case 0:return x;
+                    case 1:return y;
+                    case 2:return z;
+                    default:throw new IndexOutOfRangeException();
+                }
+            }
+            set
+            {
+                switch (i)
+                {
+                    case 0: x = value;break;
+                    case 1: y = value;break;
+                    case 2: z = value;break;
+                    default: throw new IndexOutOfRangeException();
+                }
+            }
+        }
+        #endregion
+
+        #region 构造函数
+        /// <summary>
+        /// 定义一个坐标为(0,0,0)的点
+        /// </summary>
+        public Point()
+        {
+            X = 0;Y = 0;Z = 0;
+        }
+        /// <summary>
+        /// 定义一个坐标为(x,y,z)的点
+        /// </summary>
+        /// <param name="x"></param>
+        /// <param name="y"></param>
+        /// <param name="z"></param>
+        public Point(double x,double y,double z)
+        {
+            X = x;
+            Y = y;
+            Z = z;
+        }
+        #endregion
+
+        #region 方法
+        /// <summary>
+        /// 两点p1,p2间距离
+        /// </summary>
+        /// <param name="p1"></param>
+        /// <param name="p2"></param>
+        /// <returns></returns>
+        public static double Distance(Point p1,Point p2)
+        {
+            return Math.Sqrt(Math.Pow(p1.X - p2.X, 2) + Math.Pow(p1.Y - p2.Y, 2) + Math.Pow(p1.Z - p2.Z, 2));
+        }
+        /// <summary>
+        /// 两点间(x1,y1,z1), (x2,y2,z2)间的距离
+        /// </summary>
+        /// <param name="x1"></param>
+        /// <param name="y1"></param>
+        /// <param name="z1"></param>
+        /// <param name="x2"></param>
+        /// <param name="y2"></param>
+        /// <param name="z2"></param>
+        /// <returns></returns>
+        public static double Distance(double x1,double y1,double z1,double x2,double y2,double z2)
+        {
+            return Math.Sqrt(Math.Pow(x2 - x1, 2) + Math.Pow(y2 - y1, 2) + Math.Pow(z2 - z1, 2));
+        }
+
+        /// <summary>
+        /// 到点p的距离
+        /// </summary>
+        /// <param name="p"></param>
+        /// <returns></returns>
+        public double DistanceTo(Point p)
+        {
+            return Math.Sqrt(Math.Pow(X - p.X, 2) + Math.Pow(Y - p.Y, 2) + Math.Pow(Z - p.Z, 2));
+        }
+
+        /// <summary>
+        /// 到原点的距离
+        /// </summary>
+        /// <returns></returns>
+        public double Distance_To_Origin()
+        {
+            return Math.Sqrt(Math.Pow(X, 2) + Math.Pow(Y, 2) + Math.Pow(Z, 2));
+        }
+
+        /// <summary>
+        /// 返回两个点是否相等的布尔值
+        /// </summary>
+        /// <param name="obj"></param>
+        /// <returns></returns>
+        public override bool Equals(object obj)
+        {
+            var point = obj as Point;
+            return point != null &&
+                   X == point.X &&
+                   Y == point.Y &&
+                   Z == point.Z;
+        }
+
+        public override int GetHashCode()
+        {
+            var hashCode = -237065584;
+            hashCode = hashCode * -1521134295 + x.GetHashCode();
+            hashCode = hashCode * -1521134295 + y.GetHashCode();
+            hashCode = hashCode * -1521134295 + z.GetHashCode();
+            return hashCode;
+        }
+
+        //将点坐标转换为列向量
+        public DenseMatrix ToColumnVector()
+        {
+            DenseMatrix matrix = new DenseMatrix(3, 1);
+            for(int i = 0; i < 3; i++)
+            {
+                matrix[i, 0] = this[i];
+            }
+            return matrix;
+        }
+
+        //将点坐标转换为行向量
+        public DenseMatrix ToRowVector()
+        {
+            DenseMatrix matrix = new DenseMatrix(1, 3);
+            for (int i = 0; i < 3; i++)
+            {
+                matrix[0, i] = this[i];
+            }
+            return matrix;
+        }
+
+        #endregion
+
+        #region 运算符
+        //重载运算符“==”，定义Point类型相等运算符
+        public static bool operator ==(Point p1, Point p2)
+        {
+            if (p1.X == p2.X && p1.Y == p2.Y && p1.Z == p2.Z)
+                return true;
+            else
+                return false;
+        }
+
+        //重写运算符“!=”
+        public static bool operator !=(Point p1, Point p2)
+        {
+            if (p1.X == p2.X && p1.Y == p2.Y && p1.Z == p2.Z)
+                return false;
+            else
+                return true;
+        }
+        #endregion
+    }
+
     public class Coordinate_System_Transfer
     {
         /// <summary>
@@ -686,77 +893,78 @@ namespace MySystem
         /// </summary>
         public static string[,] Variable_names = { { "B", "L", "H" }, { "L", "x", "y" }, { "X", "Y", "Z" } };
 
-        /// <summary>
-        /// 三维坐标，用于保存坐标数据，表示坐标(X,Y,Z)，默认为(0,0,0)
-        /// </summary>
-        public struct Coordinate_Value
-        {
-            public double X;
-            public double Y;
-            public double Z;
+        ///// <summary>
+        ///// 三维坐标，用于保存坐标数据，表示坐标(X,Y,Z)，默认为(0,0,0)
+        ///// </summary>
+        //public struct Coordinate_Value
+        //{
+        //    public double X;
+        //    public double Y;
+        //    public double Z;
 
-            ////封装字段
-            //public double X { get => x; set => x = value; }
-            //public double Y { get => y; set => y = value; }
-            //public double Z { get => z; set => z = value; }
+        //    ////封装字段
+        //    //public double X { get => x; set => x = value; }
+        //    //public double Y { get => y; set => y = value; }
+        //    //public double Z { get => z; set => z = value; }
 
-            //重载运算符“==”，定义结构体相等运算符
-            public static bool operator ==(Coordinate_Value cv1, Coordinate_Value cv2)
-            {
-                if (cv1.X == cv2.X && cv1.Y == cv2.Y && cv1.Z == cv2.Z)
-                    return true;
-                else
-                    return false;
-            }
+        //    //重载运算符“==”，定义结构体相等运算符
+        //    public static bool operator ==(Coordinate_Value cv1, Coordinate_Value cv2)
+        //    {
+        //        if (cv1.X == cv2.X && cv1.Y == cv2.Y && cv1.Z == cv2.Z)
+        //            return true;
+        //        else
+        //            return false;
+        //    }
 
-            //重写函数Equals()
-            public override bool Equals(object obj)
-            {
-                if (!(obj is Coordinate_Value))
-                {
-                    return false;
-                }
+        //    //重写函数Equals()
+        //    public override bool Equals(object obj)
+        //    {
+        //        if (!(obj is Coordinate_Value))
+        //        {
+        //            return false;
+        //        }
 
-                var value = (Coordinate_Value)obj;
-                return X == value.X &&
-                       Y == value.Y &&
-                       Z == value.Z;
-            }
+        //        var value = (Coordinate_Value)obj;
+        //        return X == value.X &&
+        //               Y == value.Y &&
+        //               Z == value.Z;
+        //    }
 
-            //重写函数GetHashCode()
-            public override int GetHashCode()
-            {
-                var hashCode = -307843816;
-                hashCode = hashCode * -1521134295 + X.GetHashCode();
-                hashCode = hashCode * -1521134295 + Y.GetHashCode();
-                hashCode = hashCode * -1521134295 + Z.GetHashCode();
-                return hashCode;
-            }
+        //    //重写函数GetHashCode()
+        //    public override int GetHashCode()
+        //    {
+        //        var hashCode = -307843816;
+        //        hashCode = hashCode * -1521134295 + X.GetHashCode();
+        //        hashCode = hashCode * -1521134295 + Y.GetHashCode();
+        //        hashCode = hashCode * -1521134295 + Z.GetHashCode();
+        //        return hashCode;
+        //    }
 
-            //重写运算符“!=”
-            public static bool operator !=(Coordinate_Value cv1, Coordinate_Value cv2)
-            {
-                if (cv1.X == cv2.X && cv1.Y == cv2.Y && cv1.Z == cv2.Z)
-                    return false;
-                else
-                    return true;
-            }
-        }
+        //    //重写运算符“!=”
+        //    public static bool operator !=(Coordinate_Value cv1, Coordinate_Value cv2)
+        //    {
+        //        if (cv1.X == cv2.X && cv1.Y == cv2.Y && cv1.Z == cv2.Z)
+        //            return false;
+        //        else
+        //            return true;
+        //    }
+        //}
 
         //定义函数坐标系转换函数
+
         ///<summary>
         ///将大地坐标系坐标转换为子午面直角坐标；
-        ///cv.X代表X，cv.Y代表Y，cv.Z代表Z；
+        ///p.X代表X，p.Y代表Y，p.Z代表Z；
         ///ellipsoid 当前椭球体
         ///</summary>
-        public static Coordinate_Value GCStoMRACS(Coordinate_Value cv, Ellipsoid ellipsoid)
+        public static Point GCStoMRACS(Point p, Ellipsoid ellipsoid)
         {
-            Coordinate_Value MRACS = new Coordinate_Value();             //存储子午面直角坐标系坐标
+            Point MRACS = new Point();             //存储子午面直角坐标系坐标
 
             //将变量名与公式一致，便于理解
-            double B = cv.X;
-            double L = cv.Y;
-            double H = cv.Z;
+            double B = p.X;
+            double L = p.Y;
+            double H = p.Z;
 
             double x, y;
 
@@ -778,17 +986,17 @@ namespace MySystem
 
         ///<summary>
         ///大地坐标系转空间直角坐标系；
-        ///cv.X代表B，cv.Y代表L，cv.Z代表H；
+        ///p.X代表B，p.Y代表L，p.Z代表H；
         ///ellipsoid 当前椭球体
         ///</summary>
-        public static Coordinate_Value GCStoSRCS(Coordinate_Value cv, Ellipsoid ellipsoid)
+        public static Point GCStoSRCS(Point p, Ellipsoid ellipsoid)
         {
-            Coordinate_Value SRCS = new Coordinate_Value();//存储空间直角坐标系
+            Point SRCS = new Point();//存储空间直角坐标系
 
             //将变量名尽量与公式一致，便于理解
-            double B = cv.X;
-            double L = cv.Y;
-            double H = cv.Z;
+            double B = p.X;
+            double L = p.Y;
+            double H = p.Z;
 
             //定义变量N，计算N=a/W，代表内法线长
             double N = ellipsoid.a / W(B, ellipsoid.e1_square);
@@ -802,30 +1010,30 @@ namespace MySystem
 
         ///<summary>
         ///子午面直角坐标系转空间直角坐标系；
-        ///cv.X代表L，cv.Y代表x，cv.Z，代表y
+        ///p.X代表L，p.Y代表x，p.Z，代表y
         /// </summary>
-        public static Coordinate_Value MRACStoSRCS(Coordinate_Value cv)
+        public static Point MRACStoSRCS(Point p)
         {
-            Coordinate_Value SRCS = new Coordinate_Value
+            Point SRCS = new Point
             {
-                X = cv.Y * Math.Cos(cv.X * Math.PI / 180),
-                Y = cv.Y * Math.Sin(cv.X * Math.PI / 180),
-                Z = cv.Z
+                X = p.Y * Math.Cos(p.X * Math.PI / 180),
+                Y = p.Y * Math.Sin(p.X * Math.PI / 180),
+                Z = p.Z
             };//存储空间直角坐标系
             return SRCS;
         }
 
         /// <summary>
         /// 空间直角坐标系转子午面直角坐标系；
-        ///cv.X代表X，cv.Y代表Y，cv.Z代表Z
+        ///p.X代表X，p.Y代表Y，p.Z代表Z
         /// </summary>
-        public static Coordinate_Value SRCStoMRACS(Coordinate_Value cv)
+        public static Point SRCStoMRACS(Point p)
         {
-            Coordinate_Value MRACS = new Coordinate_Value();//存储子午面直角坐标
+            Point MRACS = new Point();//存储子午面直角坐标
             //化简坐标方位名称
-            double X = cv.X;
-            double Y = cv.Y;
-            double Z = cv.Z;
+            double X = p.X;
+            double Y = p.Y;
+            double Z = p.Z;
             //定义子午面直角坐标变量，存储相应的值
             double L, x, y;
 
@@ -851,14 +1059,14 @@ namespace MySystem
 
         /// <summary>
         /// 空间直角坐标系转大地坐标系；
-        ///cv.X代表X，cv.Y代表Y，cv.Z代表Z
+        ///p.X代表X，p.Y代表Y，p.Z代表Z
         /// </summary>
-        public static Coordinate_Value SRCStoGCS(Coordinate_Value cv, Ellipsoid ellipsoid)
+        public static Point SRCStoGCS(Point p, Ellipsoid ellipsoid)
         {
-            Coordinate_Value GCS = new Coordinate_Value();//存储大地坐标
+            Point GCS = new Point();//存储大地坐标
 
             //当坐标点位于地心时，无法知道点的经纬度B,L，只能知道高度H
-            if (Distance_to_Origin(cv) == 0)
+            if (p.Distance_To_Origin() == 0)
             {
                 GCS.X = Errors.Cant_Transfer;
                 GCS.Y = Errors.Cant_Transfer;
@@ -867,9 +1075,9 @@ namespace MySystem
             }
 
             //化简坐标方位名称
-            double X = cv.X;
-            double Y = cv.Y;
-            double Z = cv.Z;
+            double X = p.X;
+            double Y = p.Y;
+            double Z = p.Z;
             //定义大地坐标变量，存储相应的值
             double B, L, H;//B,L为角度
             double N;
@@ -952,16 +1160,16 @@ namespace MySystem
             return Math.Sqrt(1 + e2_square * Math.Pow(Math.Cos(B * Math.PI / 180), 2));
         }
 
-        /// <summary>
-        /// 返回点到坐标原点的距离
-        /// </summary>
-        /// <param name="coordinate_Value"></param>
-        /// <returns name="dist"></returns>
-        public static double Distance_to_Origin(Coordinate_System_Transfer.Coordinate_Value coordinate_Value)
-        {
-            double dist;
-            dist = Math.Sqrt(Math.Pow(coordinate_Value.X, 2) + Math.Pow(coordinate_Value.Y, 2) + Math.Pow(coordinate_Value.Z, 2));
-            return dist;
-        }
+        ///// <summary>
+        ///// 返回点到坐标原点的距离
+        ///// </summary>
+        ///// <param name="coordinate_Value"></param>
+        ///// <returns name="dist"></returns>
+        //public static double Distance_to_Origin(Point p)
+        //{
+        //    double dist;
+        //    dist = Math.Sqrt(Math.Pow(p.X, 2) + Math.Pow(p.Y, 2) + Math.Pow(p.Z, 2));
+        //    return dist;
+        //}
     }
 }

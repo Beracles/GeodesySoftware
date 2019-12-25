@@ -30,13 +30,6 @@
         {
             this.components = new System.ComponentModel.Container();
             this.Input_gpBx = new System.Windows.Forms.GroupBox();
-            this.Get_Parameter_dgv = new System.Windows.Forms.DataGridView();
-            this.X1 = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.Y1 = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.Z1 = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.X2 = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.Y2 = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.Z2 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.Get_Parameter_cms = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.Import_tsmi = new System.Windows.Forms.ToolStripMenuItem();
             this.Import_Excel_tsmi = new System.Windows.Forms.ToolStripMenuItem();
@@ -46,9 +39,16 @@
             this.Export_txt_tsmi = new System.Windows.Forms.ToolStripMenuItem();
             this.Calc_btn = new System.Windows.Forms.Button();
             this.tip_lbl = new System.Windows.Forms.Label();
+            this.Z2 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.Y2 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.X2 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.Z1 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.Y1 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.X1 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.Get_Parameter_dgv = new System.Windows.Forms.DataGridView();
             this.Input_gpBx.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.Get_Parameter_dgv)).BeginInit();
             this.Get_Parameter_cms.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.Get_Parameter_dgv)).BeginInit();
             this.SuspendLayout();
             // 
             // Input_gpBx
@@ -61,64 +61,6 @@
             this.Input_gpBx.TabIndex = 0;
             this.Input_gpBx.TabStop = false;
             this.Input_gpBx.Text = "输入";
-            // 
-            // Get_Parameter_dgv
-            // 
-            this.Get_Parameter_dgv.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            this.Get_Parameter_dgv.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
-            this.X1,
-            this.Y1,
-            this.Z1,
-            this.X2,
-            this.Y2,
-            this.Z2});
-            this.Get_Parameter_dgv.ContextMenuStrip = this.Get_Parameter_cms;
-            this.Get_Parameter_dgv.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.Get_Parameter_dgv.Location = new System.Drawing.Point(3, 22);
-            this.Get_Parameter_dgv.Name = "Get_Parameter_dgv";
-            this.Get_Parameter_dgv.RowTemplate.Height = 23;
-            this.Get_Parameter_dgv.Size = new System.Drawing.Size(819, 275);
-            this.Get_Parameter_dgv.TabIndex = 0;
-            this.Get_Parameter_dgv.RowsAdded += new System.Windows.Forms.DataGridViewRowsAddedEventHandler(this.Get_Parameter_dgv_RowsAdded);
-            this.Get_Parameter_dgv.RowsRemoved += new System.Windows.Forms.DataGridViewRowsRemovedEventHandler(this.Get_Parameter_dgv_RowsRemoved);
-            // 
-            // X1
-            // 
-            this.X1.HeaderText = "X1";
-            this.X1.Name = "X1";
-            this.X1.Width = 120;
-            // 
-            // Y1
-            // 
-            this.Y1.HeaderText = "Y1";
-            this.Y1.Name = "Y1";
-            this.Y1.Resizable = System.Windows.Forms.DataGridViewTriState.True;
-            this.Y1.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable;
-            this.Y1.Width = 120;
-            // 
-            // Z1
-            // 
-            this.Z1.HeaderText = "Z1";
-            this.Z1.Name = "Z1";
-            this.Z1.Width = 120;
-            // 
-            // X2
-            // 
-            this.X2.HeaderText = "X2";
-            this.X2.Name = "X2";
-            this.X2.Width = 120;
-            // 
-            // Y2
-            // 
-            this.Y2.HeaderText = "Y2";
-            this.Y2.Name = "Y2";
-            this.Y2.Width = 120;
-            // 
-            // Z2
-            // 
-            this.Z2.HeaderText = "Z2";
-            this.Z2.Name = "Z2";
-            this.Z2.Width = 120;
             // 
             // Get_Parameter_cms
             // 
@@ -193,6 +135,64 @@
             this.tip_lbl.TabIndex = 3;
             this.tip_lbl.Text = "提示：请分别输入公共点在已知椭球体下的坐标(X1,Y1,Z1)和目标椭球体下的坐标(X2,Y2,Z2)";
             // 
+            // Z2
+            // 
+            this.Z2.HeaderText = "Z2";
+            this.Z2.Name = "Z2";
+            this.Z2.Width = 120;
+            // 
+            // Y2
+            // 
+            this.Y2.HeaderText = "Y2";
+            this.Y2.Name = "Y2";
+            this.Y2.Width = 120;
+            // 
+            // X2
+            // 
+            this.X2.HeaderText = "X2";
+            this.X2.Name = "X2";
+            this.X2.Width = 120;
+            // 
+            // Z1
+            // 
+            this.Z1.HeaderText = "Z1";
+            this.Z1.Name = "Z1";
+            this.Z1.Width = 120;
+            // 
+            // Y1
+            // 
+            this.Y1.HeaderText = "Y1";
+            this.Y1.Name = "Y1";
+            this.Y1.Resizable = System.Windows.Forms.DataGridViewTriState.True;
+            this.Y1.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable;
+            this.Y1.Width = 120;
+            // 
+            // X1
+            // 
+            this.X1.HeaderText = "X1";
+            this.X1.Name = "X1";
+            this.X1.Width = 120;
+            // 
+            // Get_Parameter_dgv
+            // 
+            this.Get_Parameter_dgv.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            this.Get_Parameter_dgv.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
+            this.X1,
+            this.Y1,
+            this.Z1,
+            this.X2,
+            this.Y2,
+            this.Z2});
+            this.Get_Parameter_dgv.ContextMenuStrip = this.Get_Parameter_cms;
+            this.Get_Parameter_dgv.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.Get_Parameter_dgv.Location = new System.Drawing.Point(3, 22);
+            this.Get_Parameter_dgv.Name = "Get_Parameter_dgv";
+            this.Get_Parameter_dgv.RowTemplate.Height = 23;
+            this.Get_Parameter_dgv.Size = new System.Drawing.Size(819, 275);
+            this.Get_Parameter_dgv.TabIndex = 0;
+            this.Get_Parameter_dgv.RowsAdded += new System.Windows.Forms.DataGridViewRowsAddedEventHandler(this.Get_Parameter_dgv_RowsAdded);
+            this.Get_Parameter_dgv.RowsRemoved += new System.Windows.Forms.DataGridViewRowsRemovedEventHandler(this.Get_Parameter_dgv_RowsRemoved);
+            // 
             // Get_Parameter_Form
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
@@ -206,8 +206,8 @@
             this.Text = "求参数";
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.Get_Parameter_Form_FormClosing);
             this.Input_gpBx.ResumeLayout(false);
-            ((System.ComponentModel.ISupportInitialize)(this.Get_Parameter_dgv)).EndInit();
             this.Get_Parameter_cms.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)(this.Get_Parameter_dgv)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -216,7 +216,6 @@
         #endregion
 
         private System.Windows.Forms.GroupBox Input_gpBx;
-        private System.Windows.Forms.DataGridView Get_Parameter_dgv;
         private System.Windows.Forms.Button Calc_btn;
         private System.Windows.Forms.ContextMenuStrip Get_Parameter_cms;
         private System.Windows.Forms.ToolStripMenuItem Import_tsmi;
@@ -225,12 +224,13 @@
         private System.Windows.Forms.ToolStripMenuItem Export_tsmi;
         private System.Windows.Forms.ToolStripMenuItem Export_Excel_tsmi;
         private System.Windows.Forms.ToolStripMenuItem Export_txt_tsmi;
+        private System.Windows.Forms.Label tip_lbl;
+        private System.Windows.Forms.DataGridView Get_Parameter_dgv;
         private System.Windows.Forms.DataGridViewTextBoxColumn X1;
         private System.Windows.Forms.DataGridViewTextBoxColumn Y1;
         private System.Windows.Forms.DataGridViewTextBoxColumn Z1;
         private System.Windows.Forms.DataGridViewTextBoxColumn X2;
         private System.Windows.Forms.DataGridViewTextBoxColumn Y2;
         private System.Windows.Forms.DataGridViewTextBoxColumn Z2;
-        private System.Windows.Forms.Label tip_lbl;
     }
 }
