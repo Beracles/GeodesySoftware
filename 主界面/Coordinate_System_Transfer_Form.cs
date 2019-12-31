@@ -1,6 +1,4 @@
-﻿//坐标系转换窗体
-
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -969,14 +967,14 @@ namespace MySystem
             double x, y;
 
             //定义变量N，计算N=a/W，代表内法线长
-            double N = ellipsoid.a / W(B, ellipsoid.e1_square);
+            double N = ellipsoid.a / W(B, ellipsoid.e1_2);
 
             //MRACS.X = L;
             //MRACS.Y = ellipsoid.a * Math.Cos(B * Math.PI / 180) / W(B, ellipsoid.Eccentricity_1());//a*cosB/W
             //MRACS.Z = ellipsoid.b * Math.Sin(B * Math.PI / 180) / V(B, ellipsoid.Eccentricity_2());//b*sinB/V
 
             x = (N + H) * Math.Cos(B * Math.PI / 180);//(N+H)*cosB
-            y = (N * (1 - ellipsoid.e1_square) + H) * Math.Sin(B * Math.PI / 180);//(N*(1-e^2)+H)*sinB
+            y = (N * (1 - ellipsoid.e1_2) + H) * Math.Sin(B * Math.PI / 180);//(N*(1-e^2)+H)*sinB
 
             MRACS.X = L;
             MRACS.Y = x;
@@ -999,11 +997,11 @@ namespace MySystem
             double H = p.Z;
 
             //定义变量N，计算N=a/W，代表内法线长
-            double N = ellipsoid.a / W(B, ellipsoid.e1_square);
+            double N = ellipsoid.a / W(B, ellipsoid.e1_2);
 
-            SRCS.X = (N + H) * Math.Cos(B * Math.PI / 180) * Math.Cos(L * Math.PI / 180);                   //(N+H)*cosBcosL
+            SRCS.X = (N + H) * Math.Cos(B * Math.PI / 180) * Math.Cos(L * Math.PI / 180); //(N+H)*cosBcosL
             SRCS.Y = (N + H) * Math.Cos(B * Math.PI / 180) * Math.Sin(L * Math.PI / 180);                   //(N+H)*cosBsinL
-            SRCS.Z = (N * (1 - ellipsoid.e1_square) + H) * Math.Sin(B * Math.PI / 180); //(N*(1-e^2)+H)*sinB
+            SRCS.Z = (N * (1 - ellipsoid.e1_2) + H) * Math.Sin(B * Math.PI / 180); //(N*(1-e^2)+H)*sinB
             return SRCS;
 
         }
@@ -1084,11 +1082,11 @@ namespace MySystem
 
             L = Math.Atan(Y / X) * 180 / Math.PI;
             B = Iteration_of_B(X, Y, Z, ellipsoid) * 180 / Math.PI; //弧度转角度
-            N = ellipsoid.c / Math.Sqrt(1 + ellipsoid.e2_square * Math.Pow(Math.Cos(B*Math.PI/180), 2));  //公式(4-36)
+            N = ellipsoid.c / Math.Sqrt(1 + ellipsoid.e2_2 * Math.Pow(Math.Cos(B*Math.PI/180), 2));  //公式(4-36)
             if (B == 0)
                 H = Math.Sqrt(Math.Pow(X, 2) + Math.Pow(Y, 2)) / Math.Cos(B * Math.PI / 180) - N;
             else
-                H = Z / Math.Sin(B*Math.PI/180) - N * (1 - ellipsoid.e1_square);
+                H = Z / Math.Sin(B*Math.PI/180) - N * (1 - ellipsoid.e1_2);
 
             GCS.X = B;
             GCS.Y = L;
@@ -1110,8 +1108,8 @@ namespace MySystem
             double M = 0.00001;
 
             double t0 = Z / D;                  //迭代初始值t0
-            double p = ellipsoid.c * ellipsoid.e1_square / D; //公式(4-40)
-            double k = 1 + ellipsoid.e2_square;
+            double p = ellipsoid.c * ellipsoid.e1_2 / D; //公式(4-40)
+            double k = 1 + ellipsoid.e2_2;
             double t1, t2;                      //迭代变量
 
             t1 = t0;

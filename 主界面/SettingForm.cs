@@ -97,13 +97,21 @@ namespace MySystem
         /// <param name="e"></param>
         public void OK_btn_Click(object sender, EventArgs e)
         {
+            //若“应用”按钮为灰色，直接退出
+            if (Apply_btn.Enabled == false)
+            {
+                this.Close();
+                return;
+            }
+
             Setting.Current_Ellipsoid = Ellipsoid_cbBx.SelectedIndex;
             Setting.Current_Coordinate_System = Coordinate_System_cbBx.SelectedIndex;
             Setting.Current_Unit = Unit_cbBx.SelectedIndex;
             Setting.Save_Setting_Or_Not = Save_Setting_chkBx.Checked;
             if (mainform != null)
             {
-                ToolStrip toolstrip = (ToolStrip)this.mainform.Controls.Find("MainForm_ss", false)[0];
+                ToolStripContainer MainForm_tlSC = (ToolStripContainer)this.mainform.Controls.Find("MainForm_tlSC", false)[0];
+                ToolStrip toolstrip = (ToolStrip)MainForm_tlSC.ContentPanel.Controls.Find("MainForm_ss", false)[0];
                 ToolStripStatusLabel Current_Ellipsoid_tssl = (ToolStripStatusLabel)toolstrip.Items.Find("Current_Ellipsoid_tssl", false)[0];
                 ToolStripStatusLabel Current_Coordinate_System_tssl = (ToolStripStatusLabel)toolstrip.Items.Find("Current_Coordinate_System_tssl", false)[0];
                 ToolStripStatusLabel Current_Unit_tssl = (ToolStripStatusLabel)toolstrip.Items.Find("Current_Unit_tssl", false)[0];
@@ -127,7 +135,8 @@ namespace MySystem
             Setting.Save_Setting_Or_Not = Save_Setting_chkBx.Checked;
             if (mainform != null)
             {
-                ToolStrip toolstrip = (ToolStrip)this.mainform.Controls.Find("MainForm_ss", false)[0];
+                ToolStripContainer MainForm_tlSC = (ToolStripContainer)this.mainform.Controls.Find("MainForm_tlSC", false)[0];
+                ToolStrip toolstrip = (ToolStrip)MainForm_tlSC.ContentPanel.Controls.Find("MainForm_ss", false)[0];
                 ToolStripStatusLabel Current_Ellipsoid_tssl = (ToolStripStatusLabel)toolstrip.Items.Find("Current_Ellipsoid_tssl", false)[0];
                 ToolStripStatusLabel Current_Coordinate_System_tssl = (ToolStripStatusLabel)toolstrip.Items.Find("Current_Coordinate_System_tssl", false)[0];
                 ToolStripStatusLabel Current_Unit_tssl = (ToolStripStatusLabel)toolstrip.Items.Find("Current_Unit_tssl", false)[0];
@@ -313,24 +322,24 @@ namespace MySystem
         /// </summary>
         public double b;
         /// <summary>
-        /// 半焦距
+        /// 返回椭球在极点处的曲率半径
         /// </summary>
         public double c;
         /// <summary>
         /// 扁率
         /// </summary>
-        public double compression;
+        public double alpha;
         /// <summary>
         /// 第一偏心率平方
         /// </summary>
-        public double e1_square;
+        public double e1_2;
         /// <summary>
         /// 第二偏心率平方
         /// </summary>
-        public double e2_square;
+        public double e2_2;
 
         /// <summary>
-        /// 返回椭圆的半焦距
+        /// 返回椭球在极点处的曲率半径
         /// </summary>
         /// <returns></returns>
         public double C()
@@ -341,7 +350,7 @@ namespace MySystem
         /// <summary>
         /// 返回椭圆的扁率
         /// </summary>
-        public double Compression()
+        public double Alpha()
         {
             return (a - b) / a;
         }
@@ -349,7 +358,7 @@ namespace MySystem
         /// <summary>
         /// 返回椭圆的第一偏心率的平方
         /// </summary>
-        public double E1_square()
+        public double E1_2()
         {
             return (Math.Pow(a, 2) - Math.Pow(b, 2)) / Math.Pow(a, 2);
         }
@@ -357,7 +366,7 @@ namespace MySystem
         /// <summary>
         /// 返回椭圆的第二偏心率的平方
         /// </summary>
-        public double E2_square()
+        public double E2_2()
         {
             return (Math.Pow(a, 2) - Math.Pow(b, 2)) / Math.Pow(b, 2);
         }
@@ -385,14 +394,14 @@ namespace MySystem
         /// <param name="compression1"></param>
         /// <param name="e1_square1"></param>
         /// <param name="e2_square1"></param>
-        public Ellipsoid(double a1,double b1,double c1,double compression1,double e1_square1,double e2_square1)
+        public Ellipsoid(double a1,double b1,double c1,double alpha1,double e1_square1,double e2_square1)
         {
             a = a1;
             b = b1;
             c = c1;
-            compression = compression1;
-            e1_square = e1_square1;
-            e2_square = e2_square1;
+            alpha = alpha1;
+            e1_2 = e1_square1;
+            e2_2 = e2_square1;
         }
     }
 }

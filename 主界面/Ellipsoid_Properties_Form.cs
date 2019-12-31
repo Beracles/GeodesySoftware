@@ -30,10 +30,10 @@ namespace MySystem
             Ellipsoid ellipsoid = Setting.ellipsoids[Ellipsoid_cbBx.SelectedIndex];
             a_txtBx.Text = ellipsoid.a.ToString() + "(m)";//长半轴
             b_txtBx.Text = ellipsoid.b.ToString() + "(m)";//短半轴
-            c_txtBx.Text = ellipsoid.c.ToString() + "(m)";//半焦距
-            compression_txtBx.Text = ellipsoid.compression.ToString();//扁率
-            e1_square_txtBx.Text = ellipsoid.e1_square.ToString();//第一偏心率
-            e2_square_txtBx.Text = ellipsoid.e2_square.ToString();//第二偏心率
+            c_txtBx.Text = ellipsoid.c.ToString() + "(m)";//椭球体极点曲率半径
+            compression_txtBx.Text = ellipsoid.alpha.ToString();//扁率
+            e1_square_txtBx.Text = ellipsoid.e1_2.ToString();//第一偏心率
+            e2_square_txtBx.Text = ellipsoid.e2_2.ToString();//第二偏心率
         }
 
         private void Ellipsoid_Properties_Form_FormClosing(object sender, FormClosingEventArgs e)

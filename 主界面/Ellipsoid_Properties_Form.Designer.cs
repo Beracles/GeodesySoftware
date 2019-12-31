@@ -57,15 +57,16 @@
             // Ellipsoid_cbBx
             // 
             this.Ellipsoid_cbBx.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.Ellipsoid_cbBx.Font = new System.Drawing.Font("宋体", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
             this.Ellipsoid_cbBx.FormattingEnabled = true;
             this.Ellipsoid_cbBx.Items.AddRange(new object[] {
             "克拉索夫斯基椭球体",
             "1975国际椭球体",
             "WGS-84椭球体",
             "2000中国大地坐标系(CGCS2000)"});
-            this.Ellipsoid_cbBx.Location = new System.Drawing.Point(148, 41);
+            this.Ellipsoid_cbBx.Location = new System.Drawing.Point(148, 37);
             this.Ellipsoid_cbBx.Name = "Ellipsoid_cbBx";
-            this.Ellipsoid_cbBx.Size = new System.Drawing.Size(194, 20);
+            this.Ellipsoid_cbBx.Size = new System.Drawing.Size(206, 24);
             this.Ellipsoid_cbBx.TabIndex = 1;
             this.Ellipsoid_cbBx.SelectedIndexChanged += new System.EventHandler(this.Ellipsoid_cbBx_SelectedIndexChanged);
             // 
@@ -123,11 +124,11 @@
             // 
             this.c_lbl.AutoSize = true;
             this.c_lbl.Font = new System.Drawing.Font("宋体", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
-            this.c_lbl.Location = new System.Drawing.Point(61, 211);
+            this.c_lbl.Location = new System.Drawing.Point(29, 212);
             this.c_lbl.Name = "c_lbl";
-            this.c_lbl.Size = new System.Drawing.Size(96, 16);
+            this.c_lbl.Size = new System.Drawing.Size(128, 16);
             this.c_lbl.TabIndex = 6;
-            this.c_lbl.Text = "半焦距(c)：";
+            this.c_lbl.Text = "极点曲率半径c：";
             // 
             // c_txtBx
             // 

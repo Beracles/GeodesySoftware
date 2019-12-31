@@ -13,7 +13,7 @@
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
     <Deterministic>true</Deterministic>
     <IsWebBootstrapper>false</IsWebBootstrapper>
-    <PublishUrl>C:\Users\火狼王Zj\Desktop\</PublishUrl>
+    <PublishUrl>E:\Documents\source\C#\大地测量学软件设计\release\</PublishUrl>
     <Install>true</Install>
     <InstallFrom>Disk</InstallFrom>
     <UpdateEnabled>false</UpdateEnabled>
@@ -59,16 +59,19 @@
     <SignManifests>true</SignManifests>
   </PropertyGroup>
   <PropertyGroup>
-    <SignAssembly>false</SignAssembly>
+    <SignAssembly>true</SignAssembly>
   </PropertyGroup>
   <PropertyGroup>
-    <ManifestCertificateThumbprint>43C16CC12E1B6F241D0A8A1DFA0787123F4D8A08</ManifestCertificateThumbprint>
+    <ManifestCertificateThumbprint>33417748401F1D129453AA71C950D832937611F4</ManifestCertificateThumbprint>
   </PropertyGroup>
   <PropertyGroup>
-    <ManifestKeyFile>MySystem_TemporaryKey.pfx</ManifestKeyFile>
+    <ManifestKeyFile>MySystem_2_TemporaryKey.pfx</ManifestKeyFile>
   </PropertyGroup>
   <PropertyGroup>
     <GenerateManifests>true</GenerateManifests>
+  </PropertyGroup>
+  <PropertyGroup>
+    <AssemblyOriginatorKeyFile>MySystem_2_TemporaryKey.pfx</AssemblyOriginatorKeyFile>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="ICSharpCode.SharpZipLib, Version=1.0.0.999, Culture=neutral, PublicKeyToken=1b03e6acf1164f73, processorArchitecture=MSIL">
@@ -125,6 +128,18 @@
       <DependentUpon>Ellipsoid_Properties_Form.cs</DependentUpon>
     </Compile>
     <Compile Include="Errors.cs" />
+    <Compile Include="GetLatitudeByMeridianArcLength_Form.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="GetLatitudeByMeridianArcLength_Form.Designer.cs">
+      <DependentUpon>GetLatitudeByMeridianArcLength_Form.cs</DependentUpon>
+    </Compile>
+    <Compile Include="GetMeridianArcLengthByLatitude_Form.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="GetMeridianArcLengthByLatitude_Form.Designer.cs">
+      <DependentUpon>GetMeridianArcLengthByLatitude_Form.cs</DependentUpon>
+    </Compile>
     <Compile Include="Get_Parameter_Form.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -163,6 +178,12 @@
     <EmbeddedResource Include="Ellipsoid_Properties_Form.resx">
       <DependentUpon>Ellipsoid_Properties_Form.cs</DependentUpon>
     </EmbeddedResource>
+    <EmbeddedResource Include="GetLatitudeByMeridianArcLength_Form.resx">
+      <DependentUpon>GetLatitudeByMeridianArcLength_Form.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="GetMeridianArcLengthByLatitude_Form.resx">
+      <DependentUpon>GetMeridianArcLengthByLatitude_Form.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="Get_Parameter_Form.resx">
       <DependentUpon>Get_Parameter_Form.cs</DependentUpon>
     </EmbeddedResource>
@@ -188,6 +209,8 @@
     <EmbeddedResource Include="Ellipsoid_Transfer_Form.resx">
       <DependentUpon>Ellipsoid_Transfer_Form.cs</DependentUpon>
     </EmbeddedResource>
+    <None Include="MySystem_1_TemporaryKey.pfx" />
+    <None Include="MySystem_2_TemporaryKey.pfx" />
     <None Include="MySystem_TemporaryKey.pfx" />
     <None Include="packages.config" />
     <None Include="Properties\Settings.settings">

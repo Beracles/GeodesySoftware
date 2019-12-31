@@ -8,12 +8,58 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Diagnostics;
+using System.Runtime.InteropServices;
 using System.IO;
 
 namespace MySystem
 {
     public partial class MainForm : Form
     {
+        //// 启动控制台
+        //[DllImport("kernel32.dll", CharSet = CharSet.Auto)]
+        //public static extern bool AllocConsole();
+        //// 释放控制台
+        //[DllImport("kernel32.dll", CharSet = CharSet.Auto)]
+        //public static extern bool FreeConsole();
+
+        //[DllImport("kernel32.dll", CharSet = CharSet.Auto)]
+        //private static extern IntPtr GetConsoleWindow();
+        //[DllImport("kernel32.dll", CharSet = CharSet.Auto)]
+        //private static extern int GetConsoleOutputCP();
+
+        //public static bool HasConsole
+        //{
+        //    get { return GetConsoleWindow() != IntPtr.Zero; }
+        //}
+
+        ///// <summary>
+        ///// Creates a new console instance if the process is not attached to a console already.        
+        ///// </summary>
+        //public static void Show()
+        //{
+        //    //#if DEBUG
+        //    if (!HasConsole)
+        //    {
+        //        AllocConsole();
+        //        InvalidateOutAndError();
+        //    }
+        //    //#endif
+        //}
+        ///// <summary>
+        ///// If the process has a console attached to it, it will be detached and no longer visible. Writing to the System.Console is still possible, but no output will be shown.
+        ///// </summary>
+        //public static void Hide()
+        //{
+        //    //#if DEBUG
+        //    if (HasConsole)
+        //    {
+        //        SetOutAndErrorNull();
+        //        FreeConsole();
+        //    }
+        //    //#endif
+        //}
+
+
         /// <summary>
         /// 窗体变量，作为被打开子窗体的对象引用
         /// </summary>
@@ -70,7 +116,7 @@ namespace MySystem
             if (Setting.Save_Setting_Or_Not)
             {
                 //文件路径
-                string path = Directory.GetCurrentDirectory() + @"\..\..\..\配置文件.txt";
+                string path = Directory.GetCurrentDirectory() + @"\配置文件.txt";
 
                 //判断文件是否存在
                 if (!File.Exists(path))
@@ -190,6 +236,58 @@ namespace MySystem
             {
                 form.Activate();
                 form.WindowState = FormWindowState.Normal;
+                form.Show();
+            }
+        }
+
+        
+        private void GetLatitudeByMeridianArcLength_tsmi_Click(object sender, EventArgs e)
+        {
+            //AllocConsole();//启动控制台
+            //reinput://重新输入循环点
+            //Console.Write("请输入子午线的弧长：");
+            //string input = Console.ReadLine();
+            //double ArcLength;//子午线弧长
+            //try
+            //{
+            //    ArcLength = double.Parse(input);
+            //}
+            //catch(Exception ex)
+            //{
+            //    Console.WriteLine("输入错误！Message:" + ex.Message);
+            //    Console.WriteLine("按回车键重新输入...");
+            //    Console.ReadLine();
+            //    Console.Clear();
+            //    goto reinput;
+            //}
+            //Console.WriteLine("按回车键结束...");
+            //Console.ReadLine();
+            //FreeConsole();//释放控制台
+
+            if (form != null)
+            {
+                form.Show();
+                form.Activate();
+                form.WindowState = FormWindowState.Normal;
+            }
+            else
+            {
+                form = new GetLatitudeByMeridianArcLength_Form();
+                form.Show();
+            }
+        }
+
+        private void GetMeridianArcLengthByLatitude_tsmi_Click(object sender, EventArgs e)
+        {
+            if (form != null)
+            {
+                form.Show();
+                form.Activate();
+                form.WindowState = FormWindowState.Normal;
+            }
+            else
+            {
+                form = new GetMeridianArcLengthByLatitude_Form();
                 form.Show();
             }
         }
