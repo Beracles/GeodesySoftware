@@ -1,0 +1,15 @@
+E:\Source\C#\GeodesySoftware\主界面\obj\Debug\MySystem.csproj.AssemblyReference.cache
+E:\Source\C#\GeodesySoftware\主界面\obj\Debug\MySystem.Coordinate_System_Transfer_Form.resources
+E:\Source\C#\GeodesySoftware\主界面\obj\Debug\MySystem.Ellipsoid_Properties_Form.resources
+E:\Source\C#\GeodesySoftware\主界面\obj\Debug\MySystem.GetLatitudeByMeridianArcLength_Form.resources
+E:\Source\C#\GeodesySoftware\主界面\obj\Debug\MySystem.GetMeridianArcLengthByLatitude_Form.resources
+E:\Source\C#\GeodesySoftware\主界面\obj\Debug\MySystem.Get_Parameter_Form.resources
+E:\Source\C#\GeodesySoftware\主界面\obj\Debug\MySystem.MainForm.resources
+E:\Source\C#\GeodesySoftware\主界面\obj\Debug\MySystem.Properties.Resources.resources
+E:\Source\C#\GeodesySoftware\主界面\obj\Debug\MySystem.Search_Parameter_Form.resources
+E:\Source\C#\GeodesySoftware\主界面\obj\Debug\MySystem.SettingForm.resources
+E:\Source\C#\GeodesySoftware\主界面\obj\Debug\MySystem.Ellipsoid_Transfer_Form.resources
+E:\Source\C#\GeodesySoftware\主界面\obj\Debug\MySystem.csproj.GenerateResource.cache
+E:\Source\C#\GeodesySoftware\主界面\obj\Debug\MySystem.csproj.CoreCompileInputs.cache
+E:\Source\C#\GeodesySoftware\主界面\obj\Debug\MySystem.csproj.SuggestedBindingRedirects.cache
+E:\Source\C#\GeodesySoftware\主界面\obj\Debug\MySystem.exe.config
