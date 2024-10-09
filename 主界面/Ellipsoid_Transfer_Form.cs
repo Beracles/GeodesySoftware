@@ -11,6 +11,7 @@ using MathNet.Numerics.Data.Matlab;
 using MathNet.Numerics.LinearAlgebra.Double;
 using System.IO;
 
+
 namespace MySystem
 {
     public partial class Ellipsoid_Transfer_Form : Form
@@ -29,7 +30,7 @@ namespace MySystem
             Common_Points.Columns.Add("Z2");
 
             //刚打开此功能时，无法输入和转换，因为没有确定参数
-            foreach (Control c in Input_gpBx.Controls)
+            foreach (System.Windows.Forms.Control c in Input_gpBx.Controls)
                 c.Enabled = false;
             Transfer_btn.Enabled = false;
 
@@ -45,7 +46,7 @@ namespace MySystem
             Known_Ellipsoid_cbBx.SelectedIndex = Known_Ellipsoid_cbBx_SelectedIndex;
             Target_Ellipsoid_cbBx.SelectedIndex = Target_Ellipsoid_cbBx_SelectedIndex +
                 (Target_Ellipsoid_cbBx_SelectedIndex > Known_Ellipsoid_cbBx.SelectedIndex ? -1 : 0);
-            
+
             //为GroupBox组件添加MouseDown事件
             Input_gpBx.MouseDown += new MouseEventHandler(Ellipsoid_Transfer_Form_MouseDown);
             Output_gpBx.MouseDown += new MouseEventHandler(Ellipsoid_Transfer_Form_MouseDown);
@@ -338,7 +339,7 @@ namespace MySystem
             #endregion
 
             #endregion
-            
+
         }
 
         private void Known_Ellipsoid_cbBx_SelectedIndexChanged(object sender, EventArgs e)
@@ -431,7 +432,7 @@ namespace MySystem
                     //配置法
                     for (int i = 0; i < point_count; i++)
                     {
-                        for(int j = 0; j < 3; j++)
+                        for (int j = 0; j < 3; j++)
                         {
                             origin_point[j] = Convert.ToDouble(Common_Points.Rows[i].ItemArray[j].ToString());//获取公共点原点
                             target_point[j] = Convert.ToDouble(Common_Points.Rows[i].ItemArray[j + 3].ToString());//获取公共点目标点
@@ -448,7 +449,7 @@ namespace MySystem
 
                     for (int i = 0; i < 3; i++)
                     {
-                        p_show[i] = Result[i,0];
+                        p_show[i] = Result[i, 0];
                     }
 
                     //显示结果
@@ -476,7 +477,7 @@ namespace MySystem
                 form.WindowState = FormWindowState.Normal;
             }
         }
-        
+
         /// <summary>
         /// 查看参数
         /// </summary>
@@ -496,7 +497,7 @@ namespace MySystem
                 form.WindowState = FormWindowState.Normal;
             }
         }
-        
+
         /// <summary>
         /// 将转换参数保存为*.mat或.txt格式
         /// </summary>
@@ -531,9 +532,9 @@ namespace MySystem
                         paras[11] = daf;
                         //坐标
                         var common_points = new DenseMatrix(Common_Points.Rows.Count, Common_Points.Columns.Count);//坐标矩阵
-                        for(int i = 0; i < common_points.RowCount; i++)
+                        for (int i = 0; i < common_points.RowCount; i++)
                         {
-                            for(int j = 0; j < common_points.ColumnCount; j++)
+                            for (int j = 0; j < common_points.ColumnCount; j++)
                             {
                                 common_points[i, j] = (double)Common_Points.Rows[i].ItemArray[j];
                             }
@@ -569,10 +570,10 @@ namespace MySystem
                         sw.WriteLine(da.ToString());
                         sw.WriteLine(daf.ToString());
                         //坐标
-                        for(int i = 0; i < Common_Points.Rows.Count; i++)
+                        for (int i = 0; i < Common_Points.Rows.Count; i++)
                         {
                             string row_txt = "";
-                            for(int j = 0; j < Common_Points.Columns.Count; j++)
+                            for (int j = 0; j < Common_Points.Columns.Count; j++)
                             {
                                 row_txt += Common_Points.Rows[i].ItemArray[j].ToString() + " ";
                             }
@@ -593,7 +594,7 @@ namespace MySystem
         private void Import_Parameter_tsmi_Click(object sender, EventArgs e)
         {
             OpenFileDialog ofd = new OpenFileDialog();
-            ofd.Filter= "MatLab文件(*.mat)|*.mat|文本文件(*.txt)|*.txt";
+            ofd.Filter = "MatLab文件(*.mat)|*.mat|文本文件(*.txt)|*.txt";
             ofd.CheckFileExists = true;
             if (ofd.ShowDialog() == DialogResult.OK)
             {
@@ -604,7 +605,7 @@ namespace MySystem
                         DenseMatrix paras = (DenseMatrix)MatlabReader.Read<double>(ofd.FileName, "parameters");
                         DenseMatrix common_points = (DenseMatrix)MatlabReader.Read<double>(ofd.FileName, "common_points");
                         DenseVector parameters = (DenseVector)paras.Column(0);
-                                                
+
                         //赋值
                         //参数
                         Coordinate_System = (int)parameters[0];
@@ -621,10 +622,10 @@ namespace MySystem
                         daf = parameters[11];
                         //公共点
                         Common_Points.Rows.Clear();
-                        for(int i = 0; i < common_points.RowCount; i++)
+                        for (int i = 0; i < common_points.RowCount; i++)
                         {
                             DataRow row = Common_Points.NewRow();
-                            for(int j = 0; j < common_points.ColumnCount; j++)
+                            for (int j = 0; j < common_points.ColumnCount; j++)
                             {
                                 row[j] = common_points[i, j];
                             }
@@ -655,7 +656,7 @@ namespace MySystem
                         {
                             string[] values = row_txt.Split(' ');
                             DataRow row = Common_Points.NewRow();
-                            for(int i = 0; i < Common_Points.Columns.Count; i++)
+                            for (int i = 0; i < Common_Points.Columns.Count; i++)
                             {
                                 row[i] = Convert.ToDouble(values[i]);
                             }
@@ -669,7 +670,7 @@ namespace MySystem
                 //导入参数成功后激活“查看参数”和“导出参数”按钮
                 Search_Parameter_tsmi.Enabled = true;
                 Export_Parameter_tsmi.Enabled = true;
-                foreach(Control c in Input_gpBx.Controls)
+                foreach (Control c in Input_gpBx.Controls)
                 {
                     c.Enabled = true;
                 }
@@ -894,7 +895,7 @@ namespace MySystem
 
             return p;
         }
-        
+
         /// <summary>
         /// 将点的三维坐标数据输出到文本框中
         /// </summary>
@@ -1005,7 +1006,7 @@ namespace MySystem
                 return false;
             return true;
         }
-        
+
         /// <summary>
         /// 返回字符串中含某个字符的个数
         /// </summary>
@@ -1021,7 +1022,7 @@ namespace MySystem
             }
             return count;
         }
-        
+
         /// <summary>
         /// 当输入框获得输入焦点时，将其置空（原来为"0"）
         /// </summary>
