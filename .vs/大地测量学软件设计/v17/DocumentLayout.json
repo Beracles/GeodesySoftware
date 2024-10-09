@@ -1,7 +1,16 @@
 {
   "Version": 1,
   "WorkspaceRootPath": "E:\\Source\\C#\\GeodesySoftware\\",
-  "Documents": [],
+  "Documents": [
+    {
+      "AbsoluteMoniker": "D:0:0:{34912F32-F6D2-4463-A92A-A5C7860A5048}|\u4E3B\u754C\u9762\\MySystem.csproj|e:\\source\\c#\\geodesysoftware\\\u4E3B\u754C\u9762\\get_parameter_form.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{34912F32-F6D2-4463-A92A-A5C7860A5048}|\u4E3B\u754C\u9762\\MySystem.csproj|solutionrelative:\u4E3B\u754C\u9762\\get_parameter_form.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{34912F32-F6D2-4463-A92A-A5C7860A5048}|\u4E3B\u754C\u9762\\MySystem.csproj|e:\\source\\c#\\geodesysoftware\\\u4E3B\u754C\u9762\\get_parameter_form.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form",
+      "RelativeMoniker": "D:0:0:{34912F32-F6D2-4463-A92A-A5C7860A5048}|\u4E3B\u754C\u9762\\MySystem.csproj|solutionrelative:\u4E3B\u754C\u9762\\get_parameter_form.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form"
+    }
+  ],
   "DocumentGroupContainers": [
     {
       "Orientation": 0,
@@ -9,11 +18,36 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": -1,
+          "SelectedChildIndex": 1,
           "Children": [
             {
               "$type": "Bookmark",
               "Name": "ST:128:0:{75188d03-9892-4ae2-abf1-207126247ce5}"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "Get_Parameter_Form.cs",
+              "DocumentMoniker": "E:\\Source\\C#\\GeodesySoftware\\\u4E3B\u754C\u9762\\Get_Parameter_Form.cs",
+              "RelativeDocumentMoniker": "\u4E3B\u754C\u9762\\Get_Parameter_Form.cs",
+              "ToolTip": "E:\\Source\\C#\\GeodesySoftware\\\u4E3B\u754C\u9762\\Get_Parameter_Form.cs",
+              "RelativeToolTip": "\u4E3B\u754C\u9762\\Get_Parameter_Form.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAYAAAASAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-10-09T14:04:40.876Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "Get_Parameter_Form.cs [\u8BBE\u8BA1]",
+              "DocumentMoniker": "E:\\Source\\C#\\GeodesySoftware\\\u4E3B\u754C\u9762\\Get_Parameter_Form.cs",
+              "RelativeDocumentMoniker": "\u4E3B\u754C\u9762\\Get_Parameter_Form.cs",
+              "ToolTip": "E:\\Source\\C#\\GeodesySoftware\\\u4E3B\u754C\u9762\\Get_Parameter_Form.cs [\u8BBE\u8BA1]",
+              "RelativeToolTip": "\u4E3B\u754C\u9762\\Get_Parameter_Form.cs [\u8BBE\u8BA1]",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-10-09T14:04:37.481Z",
+              "EditorCaption": " [\u8BBE\u8BA1]"
             }
           ]
         }
